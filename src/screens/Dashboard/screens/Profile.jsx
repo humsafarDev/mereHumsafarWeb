@@ -1,0 +1,446 @@
+import React, { useState, useRef } from 'react';
+import { FiEdit2, FiHeart, FiShare2, FiMessageSquare, FiUser, FiMapPin, FiPhone, FiMail, FiEdit, FiCamera, FiSave } from 'react-icons/fi';
+import { FaPrayingHands, FaQuran, FaMosque, FaFemale, FaHandsHelping, FaHome, FaUserFriends } from 'react-icons/fa';
+
+function Profile() {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef(null);
+  
+  const [profileData, setProfileData] = useState({
+    name: "Aisha Khan",
+    age: 26,
+    profession: "Doctor",
+    location: "Karachi, Pakistan",
+    height: "5'3\"",
+    religion: "Muslim",
+    sect: "Sunni (Hanafi)",
+    education: "MBBS (Aga Khan University)",
+    income: "PKR 150,000/month",
+    about: "I'm a practicing Muslimah who prays five times daily and observes hijab. I value deen over dunya and seek a partner who shares my commitment to Islamic values.",
+    family: {
+      father: "Business Owner (Textiles)",
+      mother: "Homemaker",
+      siblings: "2 brothers, 1 sister"
+    },
+    religiousPractices: {
+      salah: "Regular 5 times daily",
+      fasting: "All Ramadan + Sunnah fasts",
+      hijab: "Full hijab with abaya",
+      quran: "Daily recitation"
+    },
+    lifestyle: {
+      diet: "Halal only",
+      smoke: "Never",
+      drink: "Never"
+    },
+    hobbies: ["Islamic studies", "Charity work", "Teaching Quran"],
+    profilePhoto: "https://img.freepik.com/free-photo/fashion-model-seaside-covering-her-head-with-black-shawl-sitting-stones_114579-8550.jpg?ga=GA1.1.1944470534.1737377007&semt=ais_hybrid&w=740"
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleNestedInputChange = (parent, e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent],
+        [name]: value
+      }
+    }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileData(prev => ({
+          ...prev,
+          profilePhoto: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  return (
+    <div className=" mx-auto  font-sans">
+      {/* Profile Card */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        {/* Profile Header */}
+        <div className="p-1 flex items-start justify-between bg-gradient-to-r from-secondary/5 to-primary/5">
+          <div className="flex items-center">
+            <div className="relative group">
+              <img 
+                src={profileData.profilePhoto} 
+                alt={profileData.name}
+                className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
+              />
+              {isEditing && (
+                <>
+                  <button 
+                    onClick={triggerFileInput}
+                    className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <FiCamera className="text-white w-6 h-6" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </>
+              )}
+              <button 
+                onClick={() => setIsFavorite(!isFavorite)}
+                className="absolute -bottom-2 -right-2 bg-white p-2 rounded-full shadow-md hover:scale-110 transition-all"
+              >
+                <FiHeart className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-400'}`} />
+              </button>
+            </div>
+            <div className="ml-4">
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="name"
+                  value={profileData.name}
+                  onChange={handleInputChange}
+                  className="text-2xl font-bold bg-gray-50 rounded px-2 py-1 border border-gray-200"
+                />
+              ) : (
+                <h1 className="text-2xl font-bold text-gray-800">{profileData.name}, {profileData.age}</h1>
+              )}
+              <div className="flex items-center text-secondary/80 mt-1">
+                <FaFemale className="mr-1" />
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="profession"
+                    value={profileData.profession}
+                    onChange={handleInputChange}
+                    className="bg-gray-50 rounded px-2 py-1 border border-gray-200"
+                  />
+                ) : (
+                  <span>{profileData.profession}</span>
+                )}
+              </div>
+              <div className="flex items-center text-gray-500 text-sm mt-1">
+                <FiMapPin className="mr-1" />
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="location"
+                    value={profileData.location}
+                    onChange={handleInputChange}
+                    className="bg-gray-50 rounded px-2 py-1 border border-gray-200"
+                  />
+                ) : (
+                  <span>{profileData.location}</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={() => setIsEditing(!isEditing)}
+            className="bg-secondary/10 text-secondary p-2 rounded-full hover:bg-secondary/20 transition-all"
+          >
+            {isEditing ? <FiSave className="w-5 h-5" /> : <FiEdit className="w-5 h-5" />}
+          </button>
+        </div>
+
+        {/* All Sections in One View */}
+        <div className="p-6 space-y-8">
+          {/* About Section */}
+          <div className="bg-white rounded-xl  shadow-sm border border-gray-100">
+            <div className="flex items-center mb-4">
+              <FiUser className="text-secondary mr-2 text-lg" />
+              <h3 className="text-xl font-semibold text-gray-800">About Me</h3>
+            </div>
+            {isEditing ? (
+              <textarea
+                name="about"
+                value={profileData.about}
+                onChange={handleInputChange}
+                className="w-full bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 min-h-[100px]"
+              />
+            ) : (
+              <p className="text-gray-700 leading-relaxed">{profileData.about}</p>
+            )}
+            
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="w-32 text-gray-500 font-medium">Height</div>
+                  <div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="height"
+                        value={profileData.height}
+                        onChange={handleInputChange}
+                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
+                      />
+                    ) : (
+                      <span className="text-gray-700">{profileData.height}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-32 text-gray-500 font-medium">Education</div>
+                  <div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="education"
+                        value={profileData.education}
+                        onChange={handleInputChange}
+                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
+                      />
+                    ) : (
+                      <span className="text-gray-700">{profileData.education}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-32 text-gray-500 font-medium">Income</div>
+                  <div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="income"
+                        value={profileData.income}
+                        onChange={handleInputChange}
+                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
+                      />
+                    ) : (
+                      <span className="text-gray-700">{profileData.income}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3">Lifestyle</h4>
+                <div className="space-y-3">
+                  {Object.entries(profileData.lifestyle).map(([key, value]) => (
+                    <div key={key} className="flex items-center bg-secondary/5 px-4 py-2 rounded-lg">
+                      <span className="capitalize text-gray-600 w-24">{key}:</span>
+                      <span className="font-medium text-secondary">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Family Section */}
+          <div className="bg-white rounded-xl  shadow-sm border border-gray-100">
+            <div className="flex items-center mb-4">
+              <FaUserFriends className="text-secondary mr-2 text-lg" />
+              <h3 className="text-xl font-semibold text-gray-800">Family Background</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="w-32 text-gray-500 font-medium">Father</div>
+                  <div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="father"
+                        value={profileData.family.father}
+                        onChange={(e) => handleNestedInputChange('family', e)}
+                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
+                      />
+                    ) : (
+                      <span className="text-gray-700">{profileData.family.father}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-32 text-gray-500 font-medium">Mother</div>
+                  <div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="mother"
+                        value={profileData.family.mother}
+                        onChange={(e) => handleNestedInputChange('family', e)}
+                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
+                      />
+                    ) : (
+                      <span className="text-gray-700">{profileData.family.mother}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="w-32 text-gray-500 font-medium">Siblings</div>
+                  <div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="siblings"
+                        value={profileData.family.siblings}
+                        onChange={(e) => handleNestedInputChange('family', e)}
+                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
+                      />
+                    ) : (
+                      <span className="text-gray-700">{profileData.family.siblings}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Religious Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center mb-4">
+              <FaMosque className="text-secondary mr-2 text-lg" />
+              <h3 className="text-xl font-semibold text-gray-800">Religious Practices</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
+                <div className="flex items-center text-secondary mb-2">
+                  <FaPrayingHands className="mr-2" />
+                  <span className="font-medium">Salah</span>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="salah"
+                    value={profileData.religiousPractices.salah}
+                    onChange={(e) => handleNestedInputChange('religiousPractices', e)}
+                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
+                  />
+                ) : (
+                  <p className="text-gray-700">{profileData.religiousPractices.salah}</p>
+                )}
+              </div>
+              <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
+                <div className="flex items-center text-secondary mb-2">
+                  <FaQuran className="mr-2" />
+                  <span className="font-medium">Quran</span>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="quran"
+                    value={profileData.religiousPractices.quran}
+                    onChange={(e) => handleNestedInputChange('religiousPractices', e)}
+                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
+                  />
+                ) : (
+                  <p className="text-gray-700">{profileData.religiousPractices.quran}</p>
+                )}
+              </div>
+              <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
+                <div className="flex items-center text-secondary mb-2">
+                  <FaMosque className="mr-2" />
+                  <span className="font-medium">Sect</span>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="sect"
+                    value={profileData.sect}
+                    onChange={handleInputChange}
+                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
+                  />
+                ) : (
+                  <p className="text-gray-700">{profileData.sect}</p>
+                )}
+              </div>
+              <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
+                <div className="flex items-center text-secondary mb-2">
+                  <FaFemale className="mr-2" />
+                  <span className="font-medium">Hijab</span>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="hijab"
+                    value={profileData.religiousPractices.hijab}
+                    onChange={(e) => handleNestedInputChange('religiousPractices', e)}
+                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
+                  />
+                ) : (
+                  <p className="text-gray-700">{profileData.religiousPractices.hijab}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Hobbies Section */}
+          <div className="bg-white rounded-xl  shadow-sm border border-gray-100">
+            <div className="flex items-center mb-4">
+              <FaHandsHelping className="text-secondary mr-2 text-lg" />
+              <h3 className="text-xl font-semibold text-gray-800">Hobbies & Interests</h3>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {profileData.hobbies.map((hobby, index) => (
+                <span key={index} className="bg-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium">
+                  {hobby}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Section */}
+          <div className="bg-white rounded-xl  shadow-sm border border-gray-100">
+            <div className="flex items-center mb-4">
+              <FiPhone className="text-secondary mr-2 text-lg" />
+              <h3 className="text-xl font-semibold text-gray-800">Contact Through Wali</h3>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center text-secondary bg-secondary/5 p-4 rounded-lg">
+                <FiPhone className="mr-3 text-lg" />
+                <div>
+                  <div className="text-sm text-gray-500">Father's Contact</div>
+                  <div className="font-medium">+92 300 1234567</div>
+                </div>
+              </div>
+              <div className="flex items-center text-secondary bg-secondary/5 p-4 rounded-lg">
+                <FiMail className="mr-3 text-lg" />
+                <div>
+                  <div className="text-sm text-gray-500">Email</div>
+                  <div className="font-medium">wali@example.com</div>
+                </div>
+              </div>
+              <div className="text-sm text-gray-500 italic mt-4 p-3 bg-gray-50 rounded-lg">
+                According to Islamic guidelines, all communication should be through wali
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="p-6 bg-gray-50 flex flex-col sm:flex-row justify-center gap-4">
+          <button className="bg-secondary text-white px-6 py-3 rounded-lg flex items-center justify-center hover:bg-secondary/90 transition-all shadow-md">
+            <FiMessageSquare className="mr-2" />
+            Send Proposal
+          </button>
+          <button className="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm">
+            <FiShare2 className="mr-2" />
+            Share Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Profile;
