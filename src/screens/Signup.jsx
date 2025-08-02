@@ -1,9 +1,323 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { FaEnvelope, FaLock, FaHeart, FaArrowRight } from 'react-icons/fa';
+import { GiLovers } from 'react-icons/gi';
+import axiosInstance from '../utils/axiosInstance'; // Adjust the import based on your project structure
+import { NavLink, useNavigate } from 'react-router-dom';
+import Select from 'react-select';
+const Signup = () => {
+  const [otpSent, setOtpSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [profileFor, setProfileFor] = useState([]); // New state for profileFor
+  const navigate = useNavigate();
+  const { 
+    register, 
+    handleSubmit, 
+    setValue,
+    formState: { errors },
+    getValues,
+    reset
+  } = useForm();
 
-function Signup() {
+  useEffect(() => {
+
+    // Fetch profileFor options from the API
+    const fetchProfileFor = async () => {
+      try {
+        const response = await axiosInstance.get('/api/master/profile-for');
+        setProfileFor(response.data);
+      } catch (error) {
+        console.error('Error fetching profileFor options:', error);
+      }
+    };
+
+    fetchProfileFor();
+
+  }, []);
+
+  console.log('Profile For Options:', profileFor);
+
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+  
+    try {
+      const { email, profileForId, otp } = data;
+  
+      if (!otpSent) {
+        await axiosInstance.post('/api/auth/signup', {
+          email,
+          profileForId,
+        });
+  
+        console.log('OTP sent to:', email);
+        setOtpSent(true);
+      } else {
+        if (otp.length !== 6) {
+        
+          reset({ otp: '' }); // Clear OTP field
+          return;
+        }
+  
+        const otpResponse = await axiosInstance.post('/api/auth/verify', {
+          email,
+          otp,
+        });
+  
+        const { token, user } = otpResponse.data;
+  
+        localStorage.setItem('accessToken', token);
+        localStorage.setItem('userData', JSON.stringify(user));
+  
+        console.log('OTP verified successfully');
+        setShowSuccess(true);
+  
+        setTimeout(() => {
+          navigate('/registration');
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Error during signup/verification:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = () => {
+    console.log('Resending OTP to:', getValues('email'));
+    // Resend OTP logic
+  };
+
   return (
-    <div>Signup</div>
-  )
-}
+    <div className="min-h-screen bg-primary flex items-center justify-center p-4 relative">
+      <div className=' absolute inset-0  bg-[url("https://img.freepik.com/free-vector/realistic-blurred-spring-background_52683-55622.jpg?ga=GA1.1.1944470534.1737377007&semt=ais_hybrid&w=740")] bg-no-repeat bg-cover opacity-10 '></div>
+      <div className="w-full max-w-md">
+        {/* Floating Hearts Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(10)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute text-secondary opacity-40"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                fontSize: `${Math.random() * 20 + 10}px`,
+                animation: `float ${Math.random() * 10 + 10}s linear infinite`
+              }}
+            >
+              <FaHeart />
+            </div>
+          ))}
+        </div>
 
-export default Signup
+        <div className="relative bg-transparent backdrop-blur-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+          {/* Header with Romantic Theme */}
+          <div className="bg-secondary/80   p-8 text-center relative">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-1/4 left-1/4 text-4xl">
+                <FaHeart />
+              </div>
+              <div className="absolute top-1/3 right-1/3 text-3xl">
+                <FaHeart />
+              </div>
+              <div className="absolute bottom-1/4 right-1/4 text-5xl">
+                <FaHeart />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <GiLovers className="text-5xl text-white mx-auto mb-3" />
+              <h1 className="text-3xl font-bold text-white mb-2 font-serif">Welcome</h1>
+              <p className="text-pink-100">Find your soulmate today</p>
+            </div>
+          </div>
+
+          {/* Login Form */}
+          <div className="p-8">
+            {showSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-12 h-12 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Login Successful!</h2>
+                <p className="text-gray-600">Redirecting to your matches...</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="mb-6">
+    <label className="block text-gray-700 text-sm font-medium mb-2">
+      Profile For
+    </label>
+    <Select
+      options={profileFor?.map((d) => {
+
+        return { label: d.name, value: d.id };
+      })}
+      isDisabled={otpSent}
+      value={profileFor.find(opt => opt.value === profileFor)}
+      onChange={(selectedOption) => {
+        setValue('profileForId', selectedOption?.value, { shouldValidate: true });
+      }}
+       classNamePrefix="custom-select"
+  className="w-full"
+      placeholder="Select Profile For"
+    />
+    {/* Hidden input for react-hook-form to track */}
+    <input
+      type="hidden"
+      {...register('profileForId', { required: 'Profile For is required' })}
+    />
+    {errors.profileForId && (
+      <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
+    )}
+  </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="email">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary">
+                      <FaEnvelope />
+                    </div>
+                    <input
+                      id="email"
+                      type="email"
+                      disabled={otpSent}
+                      className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-0  focus:border-secondary outline-none transition`}
+                      placeholder="your@email.com"
+                      {...register('email', { 
+                        required: 'Email is required',
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: 'Invalid email address'
+                        }
+                      })}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  )}
+                </div>
+
+                {otpSent && (
+                  <div className="mb-6">
+                    <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="otp">
+                      OTP Code
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary">
+                        <FaLock />
+                      </div>
+                      <input
+                        id="otp"
+                        type="text"
+                        inputMode="numeric"
+                        className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.otp ? 'border-red-500' : 'border-gray-300'} focus:ring-0  outline-none transition`}
+                        placeholder="Enter 6-digit OTP"
+                        {...register('otp', { 
+                          required: 'OTP is required',
+                          minLength: {
+                            value: 6,
+                            message: 'OTP must be 6 digits'
+                          },
+                          maxLength: {
+                            value: 6,
+                            message: 'OTP must be 6 digits'
+                          }
+                        })}
+                      />
+                    </div>
+                    {errors.otp && (
+                      <p className="mt-1 text-sm text-red-600">{errors.otp.message}</p>
+                    )}
+                    <div className="mt-2 text-right">
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        className="text-sm text-pink-600 hover:text-secondary font-medium"
+                      >
+                        Resend OTP
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`w-full bg-secondary/80  text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80' : ''}`}
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {otpSent ? 'Verifying...' : 'Sending...'}
+                    </>
+                  ) : (
+                    <>
+                      {otpSent ? 'Verify OTP' : 'Signup'} 
+                      <FaArrowRight />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {!showSuccess && (
+              <div className="mt-6 text-center text-sm text-gray-600">
+                {otpSent ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false);
+                      reset({ email: getValues('email') });
+                    }}
+                    className="text-secondary/50 hover:text-secondary font-medium"
+                  >
+                    ← Change email address
+                  </button>
+                ) : (
+                  <>
+                    Already  have an account?{' '}
+                    <NavLink to={"/login"} className="text-pink-600 hover:text-secondary font-medium">
+                      Login
+                    </NavLink>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Hearts Animation */}
+      <style jsx global>{`
+        @keyframes float {
+          0% {
+            transform: translateY(0) rotate(0deg);
+          }
+          100% {
+            transform: translateY(-100vh) rotate(360deg);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default Signup;

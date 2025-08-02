@@ -23,7 +23,10 @@ const Header = () => {
         <Link to="/" className="flex-shrink-0">
           <img src={logo} alt="logo" className='h-12 w-auto' />
         </Link>
-        
+        <Link to="/registration" className="flex-shrink-0">
+          <img src={logo} alt="logo" className='h-12 w-auto' />
+        </Link>
+       
         <nav className="flex items-center space-x-8 relative">
           {navLinks.map((link) => (
             <NavLink
@@ -56,7 +59,7 @@ const Header = () => {
         <div className="flex-shrink-0 space-x-4">
           <Link to="/login" className="text-secondary font-medium hover:underline">Login</Link>
           <Link 
-            to="/dashboard" 
+            to="/signup" 
             className="bg-gradient-to-br from-secondarydark to-secondary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium shadow-md hover:shadow-lg"
           >
             Signup

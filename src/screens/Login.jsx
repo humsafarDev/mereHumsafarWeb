@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaEnvelope, FaLock, FaHeart, FaArrowRight } from 'react-icons/fa';
 import { GiLovers } from 'react-icons/gi';
-
+import axiosInstance from '../utils/axiosInstance'; // Adjust the import based on your project structure
+import { useNavigate } from 'react-router-dom';
 const EmailOtpLogin = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+  const navigate = useNavigate();
   const { 
     register, 
     handleSubmit, 
@@ -16,23 +17,56 @@ const EmailOtpLogin = () => {
     reset
   } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async(data) => {
+  
+    
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
       if (!otpSent) {
+        const response = await axiosInstance.post('/api/auth/login', data)
+      
+         console.log(response)
         console.log('OTP sent to:', data.email);
         setOtpSent(true);
       } else {
-        console.log('OTP verified for:', data.email);
-        setShowSuccess(true);
-        setTimeout(() => {
-          // Redirect after successful login
-          console.log('Redirecting to dashboard...');
-        }, 1500);
+        console.log('OTP verified for:', data.email, 'OTP:', data.otp);
+        if (data.otp.length === 6) {
+          const otpResponse = await axiosInstance.post('/api/auth/verify', {
+            email: data.email,
+            otp: data.otp
+          });
+
+          console.log(otpResponse.data,'OTP verified successfully');
+          localStorage.setItem('accessToken', otpResponse?.data.token);
+          localStorage.setItem('userData', JSON.stringify(otpResponse?.data.user));
+          setShowSuccess(true);
+          // Redirect to dashboard or show success message
+         // Adjust the path as needed
+          // setShowSuccess(true);
+          setTimeout(() => {
+          //  console.log('Redirecting to dashboard...');
+            // Here you would actually redirect the user
+            navigate('/dashboard');
+          }, 1500);
+        } else {
+
+          // Handle invalid OTP
+          reset({ otp: '' }); // Clear OTP field
+          //setOtpSent(false); // Reset OTP sent state
+          setIsLoading(false);
+          console.log('Invalid OTP');
+        }
       }
+    } catch (error) {
+     alert('Error during OTP submission:', error);
       setIsLoading(false);
-    }, 1000);
+      navigate("/")
+      return;
+    }
+  
+      
+      setIsLoading(false);
+   
   };
 
   const handleResendOtp = () => {

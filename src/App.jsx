@@ -20,7 +20,16 @@ import PhotoRequests from "./screens/Dashboard/screens/Notifications/PhotoReques
 import OtherNotifications from "./screens/Dashboard/screens/Notifications/OtherNotifications";
 import DashboardWidgets from "./screens/Dashboard/screens/DashboardWidgets";
 
+import PrivateRoute from "./conponents/PrivateRoute";
+import Registration from "./screens/Registration";
+
+
 function App() {
+
+//create a function if user token is exist in localStorage then redirect to dashboard otherwise redirect to login page
+
+
+
   return (
     <Router>
       <Routes>
@@ -33,11 +42,23 @@ function App() {
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="login" element={<Login />} />
+          
           <Route path="signup" element={<Signup />} />
         </Route>
-
+        <Route path="registration" element={
+  <PrivateRoute>
+    <Registration />
+  </PrivateRoute>
+} />
         {/* Dashboard Routes */}
-        <Route path="dashboard" element={<DashboardLayout />}>
+        <Route path="dashboard" element={
+  <PrivateRoute>
+    <DashboardLayout />
+  </PrivateRoute>
+}>
+
+
+
           <Route index  element={<DashboardWidgets />} />
           <Route path="widgets" element={<DashboardWidgets />} />
           <Route path="profile" element={<Profile />} />

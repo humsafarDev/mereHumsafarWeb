@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import ErrorHandle from "../Components/Widgets/ErrorHandle";
+
 
 import { queryClient } from "../utils/queryClient";
-import axiosInstance from "../Utils/axiosInstance";
-import { verify } from "../api/authApi";
+import axiosInstance from "../utils/axiosInstance";
+
 
 const useAuthStore = create((set) => ({
     user: null,
@@ -11,27 +11,27 @@ const useAuthStore = create((set) => ({
     refreshToken: localStorage.getItem("refreshToken") || null,
     isAuthenticated: !!localStorage.getItem("accessToken"),
     checkAuthOnReload: () => {
-        const accessToken = localStorage.getItem("accessToken");
-        const refreshToken = localStorage.getItem("refreshToken");
+        // const accessToken = localStorage.getItem("accessToken");
+        // const refreshToken = localStorage.getItem("refreshToken");
 
-        if (accessToken && refreshToken) {
-            set({ accessToken, refreshToken, isAuthenticated: true });
-        } else {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            set({ accessToken: null, refreshToken: null, isAuthenticated: false });
-        }
+        // if (accessToken && refreshToken) {
+        //     set({ accessToken, refreshToken, isAuthenticated: true });
+        // } else {
+        //     localStorage.removeItem("accessToken");
+        //     localStorage.removeItem("refreshToken");
+        //     set({ accessToken: null, refreshToken: null, isAuthenticated: false });
+        // }
     },
     login: async (payload) => {
         try {
             const response = await axiosInstance.post('/auth/login', payload);
 
-            if (response.data.status === "success") {
+            // if (response.data.status === "success") {
                 // const { accessToken, refreshToken } = response.data.body;
                 // set({ accessToken, refreshToken, isAuthenticated: true  });
                 // localStorage.setItem("accessToken", accessToken);
                 // localStorage.setItem("refreshToken", refreshToken);
-            }
+            // }
 
             return response;
         } catch (error) {
@@ -41,8 +41,8 @@ const useAuthStore = create((set) => ({
     },
 
     verify: async (payload) => {
-        try {
-            const response = await verify(payload);
+        try{
+            const response = await axiosInstance.post('/auth/verify', payload);
             if (response?.data?.code === 200 || response?.data?.code === 201) {
              
                 const accessToken = response.data.body;
@@ -55,7 +55,8 @@ const useAuthStore = create((set) => ({
             }
             return response;
         } catch (error) {
-            ErrorHandle(error);
+            console.error("Verification error:", error);
+            alert(error?.response?.data?.message || "Verification failed");
             throw error;
         }
     },
