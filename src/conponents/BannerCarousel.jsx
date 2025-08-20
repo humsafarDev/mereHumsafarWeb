@@ -236,6 +236,7 @@
 // export default BannerCarousel;
 
 
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -262,7 +263,7 @@ const slides = [
 
 const BannerCarousel = () => {
   const [current, setCurrent] = useState(0);
-
+const [bannerData, setBannerData] = useState([]);
   const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
@@ -271,10 +272,22 @@ const BannerCarousel = () => {
     const interval = setInterval(nextSlide, 4000);
     return () => clearInterval(interval);
   }, []);
+  const fetchBanner = async() => {
+
+    const res =await axios.get("https://merehumsafar-backend.onrender.com/api/master/banner");
+    
+    console.log("banner data", res.data);
+    setBannerData(res.data);  
+  }
+
+  useEffect(() => {
+fetchBanner();
+
+  }, [])
 
   return (
     <section className="relative h-[90vh]  w-full overflow-hidden text-white">
-      {slides.map((slide, index) => (
+      {bannerData?.map((slide, index) => (
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${

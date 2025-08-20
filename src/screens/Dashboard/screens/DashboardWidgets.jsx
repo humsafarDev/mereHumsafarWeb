@@ -1,47 +1,196 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaUser, FaHeart, FaImage, FaCog, FaSearch, FaEnvelope, FaLock, FaStar } from 'react-icons/fa';
+import { isValid } from '../../../Utils/common'; // Assuming you have a package for email validation
+import axios from 'axios';
 
 function DashboardWidgets() {
   // Fake data for matrimonial site
+
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  const [loading , setLoading] = React.useState(false);
+  const [profiledata, setProfileData] = React.useState(null);
+  console.log("userData", userData);
+
+  //https://merehumsafar-backend.onrender.com/api/master/profile/lily@gmail.com
+
+  useEffect(() => {
+    setLoading(true);
+    const promise = async () => {
+      try {
+
+        const response = await fetch(`https://merehumsafar-backend.onrender.com/api/master/profile/${userData?.email}`);
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setProfileData(data);
+        setLoading(false);
+        //  console.log("Fetched user data:", data);
+        localStorage.setItem("userData", JSON.stringify(data));
+
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        setLoading(false);
+      }
+    }
+
+    if (isValid(userData?.email)) {
+      promise();
+    } else {
+      console.error("Invalid email address:", userData?.email);
+    }
+
+
+  }, [userData?.email]);
+  const findAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
   const profileData = {
-  name: "Ayesha Khan",
-  age: 25,
-  profession: "UI/UX Designer",
-  location: "Hyderabad, India",
-  completeness: 85,
-  lastActive: "2 hours ago"
-};
+    name: profiledata?.name,
+    age: findAge(profiledata?.dateOfBirth), // Assuming dob is in 'YYYY-MM-DD' format
+    email: profiledata?.email,  
+   
+    completeness: 85,
+    lastActive: "2 hours ago"
+  };
 
-const interestRequests = [
-  { id: 1, name: "Mohammad Faizan", age: 28, sent: "1 day ago" },
-  { id: 2, name: "Abdul Rahman", age: 30, sent: "3 days ago" },
-  { id: 3, name: "Zaid Ali", age: 27, sent: "1 week ago" }
-];
+  const interestRequests = [
+    { id: 1, name: "Mohammad Faizan", age: 28, sent: "1 day ago" },
+    { id: 2, name: "Abdul Rahman", age: 30, sent: "3 days ago" },
+    { id: 3, name: "Zaid Ali", age: 27, sent: "1 week ago" }
+  ];
 
-const photoRequests = [
-  { id: 1, name: "Fatima Syed", age: 24, requested: "Yesterday" },
-  { id: 2, name: "Zoya Siddiqui", age: 23, requested: "2 days ago" }
-];
+  const photoRequests = [
+    { id: 1, name: "Fatima Syed", age: 24, requested: "Yesterday" },
+    { id: 2, name: "Zoya Siddiqui", age: 23, requested: "2 days ago" }
+  ];
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+  
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+  
+      setLoading(true); // Show loader
+  
+      // Step 1: Upload image
+      const uploadRes = await axios.post(
+        'https://merehumsafar-backend.onrender.com/api/master/profile/upload',
+        formData
+      );
+  
+      const uploadedImageId = uploadRes?.data?.id;
+  
+      // ✅ Check if image upload was successful
+      if (uploadRes.status === 200 && uploadedImageId) {
+        console.log("✅ Image uploaded successfully:", uploadedImageId);
+  
+        // Step 2: Update profile with uploadedImageId
+        const email = profiledata?.email;
+  
+        const updateRes = await axios.put(
+          `https://merehumsafar-backend.onrender.com/api/master/complete-profile?email=${email}`,
+          { uploadedImageId }
+        );
+  
+        if (updateRes.status === 200) {
+          // Step 3: Fetch latest profile
+          const latestProfileRes = await fetch(
+            `https://merehumsafar-backend.onrender.com/api/master/profile/${email}`
+          );
+  
+          if (!latestProfileRes.ok) {
+            throw new Error("❌ Failed to fetch latest profile data");
+          }
+  
+          const latestProfileData = await latestProfileRes.json();
+          setProfileData(latestProfileData);
+          localStorage.setItem("userData", JSON.stringify(latestProfileData));
+          console.log("✅ Latest profile data fetched");
+        } else {
+          console.error("❌ Profile update failed");
+        }
+      } else {
+        console.error("❌ Image upload failed");
+        return; // stop further execution
+      }
+    } catch (error) {
+      console.error("❌ Error during image upload or profile update:", error);
+    } finally {
+      setLoading(false); // Always hide loader
+    }
+  };
+  
+  
+
 
 
   return (
-    <div className="min-h-screen w-full p-4 ">
-        <div className="absolute inset-0 bg-[url('https://img.freepik.com/free-vector/hand-drawn-floral-wallpaper_52683-67169.jpg?t=st=1753447039~exp=1753450639~hmac=be3911a00385e3ad28afae0ccf05736bfe8541880389d2d88d3e310f81607ca9&w=1380')] bg-cover bg-center bg-no-repeat opacity-5 "></div>
+    <>
+      {
+        loading ? <>
+          <div className="flex items-center justify-center min-h-screen">
+
+            <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500"></div>
+          </div>
+        </>
+        :   <div className="min-h-screen w-full p-4 ">
+      <div className="absolute inset-0 bg-[url('https://img.freepik.com/free-vector/hand-drawn-floral-wallpaper_52683-67169.jpg?t=st=1753447039~exp=1753450639~hmac=be3911a00385e3ad28afae0ccf05736bfe8541880389d2d88d3e310f81607ca9&w=1380')] bg-cover bg-center bg-no-repeat opacity-5 "></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Profile Widget - 2 columns on medium+ screens */}
         <div className="md:col-span-2 bg-white rounded-xl shadow-md p-6">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center text-white text-3xl">
-                {profileData.name.charAt(0)}
-              </div>
+
+            <div className="relative w-24 h-24">
+              {/* Profile Image */}
+              <img
+                src={`https://merehumsafar-backend.onrender.com${profiledata?.uploadedImage?.imagePath}`} // fallback image
+                alt="Profile"
+                className="w-24 h-24 rounded-full object-cover border-2 border-white"
+              />
+
+              {/* Green active dot */}
               <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full w-6 h-6 border-2 border-white"></div>
+
+              {/* Upload icon overlay */}
+              <label
+                htmlFor="profileUpload"
+                className="absolute bottom-0 right-0 bg-white rounded-full p-1 cursor-pointer shadow-md hover:shadow-lg transition"
+                title="Upload profile picture"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v6m0 0l3-3m-3 3l-3-3m6-9h.01M6 9h.01" />
+                </svg>
+                <input
+                  id="profileUpload"
+                  type="file"
+                accept="image/png, image/jpeg, image/jpg"
+                  className="hidden"
+                onChange={handleImageUpload} // 👇 function to handle upload
+                />
+              </label>
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-800">{profileData.name}, {profileData.age}</h2>
               <p className="text-gray-600">{profileData.profession}</p>
               <p className="text-gray-500 text-sm mt-1 flex items-center gap-1">
-                <FaSearch className="text-blue-500" /> {profileData.location}
+                <FaSearch className="text-blue-500" /> {`${profiledata?.country}, ${profiledata?.state}, ${profiledata?.city}`}
               </p>
               <div className="mt-3">
                 <div className="flex justify-between text-sm mb-1">
@@ -49,8 +198,8 @@ const photoRequests = [
                   <span className="font-medium">{profileData.completeness}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full" 
+                  <div
+                    className="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full"
                     style={{ width: `${profileData.completeness}%` }}
                   ></div>
                 </div>
@@ -195,6 +344,9 @@ const photoRequests = [
         </div>
       </div>
     </div>
+      }
+    </>
+  
   );
 }
 

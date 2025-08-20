@@ -1,48 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 
-import axiosInstance from "../utils/axiosInstance";
+import { isValid } from "../Utils/common";
 
 const PrivateRoute = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [isLoading, setIsLoading] = useState(true);
 
-  const accessToken = localStorage.getItem("accessToken");
 
-  useEffect(() => {
-    const validateToken = async () => {
-      if (!accessToken) {
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
+  const accessToken = localStorage.getItem("mereHumsafarToken");
 
-      try {
-        const res = await axiosInstance.post("/api/auth/validate", {
-          token: accessToken,
-        });
+  // useEffect(() => {
+  //   const validateToken = async () => {
+  //     if (!accessToken) {
+  //       setIsAuthenticated(false);
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-        if (res.status === 200 && res.data?.valid) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Token validation failed:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //     try {
+  //       const res = await axiosInstance.post("/api/auth/validate", {
+  //         token: accessToken,
+  //       });
 
-    validateToken();
-  }, [accessToken]);
+  //       if (res.status === 200 && res.data?.valid) {
+  //         setIsAuthenticated(true);
+  //       } else {
+  //         setIsAuthenticated(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Token validation failed:", error);
+  //       setIsAuthenticated(false);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-  if (isLoading) {
-    return <div>Loading...</div>; // or a spinner
-  }
+  //   validateToken();
+  // }, [accessToken]);
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+//if token is availabel then authenticate 
+
+    
+
+  // if (isLoading) {
+  //   return <div>Loading...</div>; // or a spinner
+  // }
+
+  return isValid(accessToken) ? children : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;

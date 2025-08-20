@@ -4,7 +4,10 @@ import { FaEnvelope, FaLock, FaHeart, FaArrowRight, FaPhone, FaCalendar, FaUser,
 import { GiLovers } from 'react-icons/gi';
 import { Country, State, City } from 'country-state-city';
 import Select from 'react-select';
-import axiosInstance from '../utils/axiosInstance';
+
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 const SignupPage = () => {
   const {
     register,
@@ -14,46 +17,56 @@ const SignupPage = () => {
     setValue,
     formState: { errors },
   } = useForm();
+const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [education , setEducation] = useState([]);
   const [occupation, setOccupation] = useState([]);
   const [employedIn, setEmployedIn] = useState([]);
   const [marital, setMarital] = useState([]);
   const [caste, setCaste] = useState([]);
+  const [motherTongue, setMotherTongue] = useState([]);
   //get userData from localStorage
   const userData = JSON.parse(localStorage.getItem('userData')) || {};
-  const onSubmit = async(data) => {
-const modified = {
-  ...data,
-  name: data.name, // Trim whitespace from name
-  liveWithFamily: data.liveWithFamily=== "yes"? true : false, // Default to 'no' if not provided
-  email: userData.email || '',
-  height: parseInt(data.height) || '', // Default to empty string if not provided
+  const onSubmit = async (data) => {
+    const modified = {
+      ...data,
+      motherTongueId: data.motherTongueId || null,
+      name: data.name.trim(), // Trim whitespace from name
+      liveWithFamily: data.liveWithFamily ?? null,
+      height: parseInt(data.height) ?? null,
+      country: data.country?.label || null,
+      state: data.state?.label || null,
+      city: data.city ||null ,
+      profileForId: userData.profileFor?.id || null,
+    };
+  
+    try {
+      const makeProfileResponse = await axios.put(
+        `https://merehumsafar-backend.onrender.com/api/master/complete-profile?email=${userData.email}`,
+        modified
+      );
+  
 
-  profileForId: userData.profileFor.id || '', // Default to empty string if not provided
-  profileFor: userData.profileFor || '',
-}
+      console.log('Response from makeProfile:', makeProfileResponse);
+      const makeProfileData = makeProfileResponse.data?.data;
+  
+      if (makeProfileResponse.status === 200) {
+        console.log('Profile created successfully:', makeProfileData);
+        localStorage.setItem('userData', JSON.stringify(makeProfileData));
+        alert("Profile created successfully");
+  
+        // ✅ Navigate only when successful
+        navigate('/dashboard');
+      } else {
+        console.error('Error making profile:', makeProfileData.message);
+      }
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      // navigate() yahan nahi hona chahiye
+    }
 
-try{
-  // Send data to the server
- const makeProfileResponse =await axiosInstance.put(`/api/master/complete-profile?email=${userData.email}`, modified)
-  const makeProfileData = makeProfileResponse.data;
-  // Handle the response as needed
-  if (makeProfileData.success) {
-    // Clear userData from localStorage
-    localStorage.removeItem('userData');
-    // Redirect to the next page or show success message
-    window.location.href = '/dashboard'; // Redirect to the dashboard or any other page
-  } else {
-    console.error('Error making profile:', makeProfileData.message);
-  }
 
-}catch(err){
-  console.error('Error submitting form:', err);
-  return;
-
-}
-    console.log('Form Submitted:', data);
+    console.log('Form submitted:', modified);
   };
 
   const fetchAllApis = async () => {
@@ -64,12 +77,14 @@ try{
         employedInResult,
         maritalResult,
         casteResult,
+        motherTongueResult
       ] = await Promise.allSettled([
-        axiosInstance.get('/api/master/education'),
-        axiosInstance.get('/api/master/occupation'),
-        axiosInstance.get('/api/master/employed-in'),
-        axiosInstance.get('/api/master/marital'),
-        axiosInstance.get('/api/master/caste'),
+        axios.get('https://merehumsafar-backend.onrender.com/api/master/education'),
+        axios.get('https://merehumsafar-backend.onrender.com/api/master/occupation'),
+        axios.get('https://merehumsafar-backend.onrender.com/api/master/employed-in'),
+        axios.get('https://merehumsafar-backend.onrender.com/api/master/marital'),
+        axios.get('https://merehumsafar-backend.onrender.com/api/master/caste'),
+        axios.get('https://merehumsafar-backend.onrender.com/api/master/mother-tongue')
       ]);
   
       if (educationResult.status === 'fulfilled') {
@@ -90,6 +105,9 @@ try{
   
       if (casteResult.status === 'fulfilled') {
         setCaste(casteResult.value.data);
+      }
+       if (motherTongueResult.status === 'fulfilled') {
+        setMotherTongue(motherTongueResult.value.data);
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -231,7 +249,10 @@ try{
 
 
                     onChange={(selectedOption) => {
-                      setValue('country', selectedOption?.value, { shouldValidate: true });
+                      setValue('country', {
+                        value: selectedOption?.value,
+                        label: selectedOption?.label
+                      }, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -252,14 +273,17 @@ try{
                     State
                   </label>
                   <Select
-                    options={State.getStatesOfCountry(watch("country"))?.map(country => ({
+                    options={State.getStatesOfCountry(watch("country")?.value)?.map(country => ({
                       value: country.isoCode,
                       label: country.name
                     }))}
                     isDisabled={!watch('country')}
 
                     onChange={(selectedOption) => {
-                      setValue('state', selectedOption?.value, { shouldValidate: true });
+                      setValue('state',  {
+                        value: selectedOption?.value,
+                        label: selectedOption?.label
+                      }, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -280,14 +304,14 @@ try{
                     City
                   </label>
                   <Select
-                    options={City.getCitiesOfState(watch("country"), watch("state"))?.map(country => ({
+                    options={City.getCitiesOfState(watch("country")?.value, watch("state")?.value)?.map(country => ({
                       value: country.name,
                       label: country.name
                     }))}
                     isDisabled={!watch('state') && !watch('country')}
 
                     onChange={(selectedOption) => {
-                      setValue('city', selectedOption?.value, { shouldValidate: true });
+                      setValue('city', selectedOption?.label, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -341,10 +365,10 @@ try{
                   <Select
                     options={[{
                       label: "Yes",
-                      value: "yes"
+                      value: "1"
                     }, {
                       label: "No",
-                      value: "no"
+                      value: "2"
                     }]}
 
                     onChange={(selectedOption) => {
@@ -379,7 +403,7 @@ try{
 
 
                     onChange={(selectedOption) => {
-                      setValue('maritalStatus', selectedOption?.value, { shouldValidate: true });
+                      setValue('maritalStatusTypeId', selectedOption?.value, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -388,10 +412,10 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('maritalStatus', { required: 'Marital Status is required' })}
+                    {...register('maritalStatusTypeId', { required: 'Marital Status is required' })}
                   />
-                  {errors.maritalStatus && (
-                    <p className="mt-1 text-sm text-red-600">{errors.maritalStatus.message}</p>
+                  {errors.maritalStatusTypeId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.maritalStatusTypeId.message}</p>
                   )}
                 </div>
                 {/* Mother Tongue */}
@@ -401,16 +425,14 @@ try{
                   </label>
                   <Select
                     options={
-                      [
-                        { label: "English", value: "english" },
-                        { label: "Hindi", value: "hindi" },
-                        { label: "Spanish", value: "spanish" },
-                        { label: "French", value: "french" }
-                      ]
+                      motherTongue?.map((tongue) => ({
+                        label: tongue.name,
+                        value: tongue.id
+                      }))
                     }
 
                     onChange={(selectedOption) => {
-                      setValue('motherTongue', selectedOption?.value, { shouldValidate: true });
+                      setValue('motherTongueId', selectedOption?.value, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -419,9 +441,9 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('motherTongue', { required: 'mother Tongue is required' })}
+                    {...register('motherTongueId', { required: 'mother Tongue is required' })}
                   />
-                  {errors.motherTongue && (
+                  {errors.motherTongueId && (
                     <p className="mt-1 text-sm text-red-600">{errors.motherTongue.message}</p>
                   )}
                 </div>
@@ -440,7 +462,7 @@ try{
 
 
                     onChange={(selectedOption) => {
-                      setValue('caste', selectedOption?.value, { shouldValidate: true });
+                      setValue('casteTypeId', selectedOption?.value, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -449,10 +471,10 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('caste', { required: 'Caste is required' })}
+                    {...register('casteTypeId', { required: 'Caste is required' })}
                   />
-                  {errors.caste && (
-                    <p className="mt-1 text-sm text-red-600">{errors.caste.message}</p>
+                  {errors.casteTypeId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.casteTypeId.message}</p>
                   )}
                 </div>
                 {/* Height */}
@@ -508,7 +530,7 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('caste', { required: 'Height is required' })}
+                    {...register('height', { required: 'Height is required' })}
                   />
                   {errors.height && (
                     <p className="mt-1 text-sm text-red-600">{errors.height.message}</p>
@@ -534,7 +556,7 @@ try{
 
 
                     onChange={(selectedOption) => {
-                      setValue('highestEducation', selectedOption?.value, { shouldValidate: true });
+                      setValue('educationTypeId', selectedOption?.value, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -543,10 +565,10 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('highestEducation', { required: 'Highest Education is required' })}
+                    {...register('educationTypeId', { required: 'Highest Education is required' })}
                   />
-                  {errors.highestEducation && (
-                    <p className="mt-1 text-sm text-red-600">{errors.highestEducation.message}</p>
+                  {errors.educationTypeId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.educationTypeId.message}</p>
                   )}
                 </div>
 
@@ -565,7 +587,7 @@ try{
 
 
                     onChange={(selectedOption) => {
-                      setValue('occupation', selectedOption?.value, { shouldValidate: true });
+                      setValue('occupationTypeId', selectedOption?.value, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -574,10 +596,10 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('occupation', { required: 'Occupation is required' })}
+                    {...register('occupationTypeId', { required: 'Occupation is required' })}
                   />
-                  {errors.occupation && (
-                    <p className="mt-1 text-sm text-red-600">{errors.occupation.message}</p>
+                  {errors.occupationTypeId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.occupationTypeId.message}</p>
                   )}
                 </div>
 
@@ -596,7 +618,7 @@ try{
 
 
                     onChange={(selectedOption) => {
-                      setValue('employedIn', selectedOption?.value, { shouldValidate: true });
+                      setValue('employedInId', selectedOption?.value, { shouldValidate: true });
                     }}
                     classNamePrefix="custom-select"
                     className="w-full"
@@ -605,10 +627,10 @@ try{
                   {/* Hidden input for react-hook-form to track */}
                   <input
                     type="hidden"
-                    {...register('employedIn', { required: 'Employed In is required' })}
+                    {...register('employedInId', { required: 'Employed In is required' })}
                   />
-                  {errors.employedIn && (
-                    <p className="mt-1 text-sm text-red-600">{errors.employedIn.message}</p>
+                  {errors.employedInId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.employedInId.message}</p>
                   )}
                 </div>
 

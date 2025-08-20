@@ -4,6 +4,7 @@ import { FaEnvelope, FaLock, FaHeart, FaArrowRight } from 'react-icons/fa';
 import { GiLovers } from 'react-icons/gi';
 import axiosInstance from '../utils/axiosInstance'; // Adjust the import based on your project structure
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 const EmailOtpLogin = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +24,7 @@ const EmailOtpLogin = () => {
     setIsLoading(true);
     try {
       if (!otpSent) {
-        const response = await axiosInstance.post('/api/auth/login', data)
+        const response = await axiosInstance.post('https://merehumsafar-backend.onrender.com/api/auth/login', data)
       
          console.log(response)
         console.log('OTP sent to:', data.email);
@@ -31,13 +32,13 @@ const EmailOtpLogin = () => {
       } else {
         console.log('OTP verified for:', data.email, 'OTP:', data.otp);
         if (data.otp.length === 6) {
-          const otpResponse = await axiosInstance.post('/api/auth/verify', {
+          const otpResponse = await axios.post('https://merehumsafar-backend.onrender.com/api/auth/verify', {
             email: data.email,
             otp: data.otp
           });
 
           console.log(otpResponse.data,'OTP verified successfully');
-          localStorage.setItem('accessToken', otpResponse?.data.token);
+          localStorage.setItem('mereHumsafarToken', otpResponse?.data.token);
           localStorage.setItem('userData', JSON.stringify(otpResponse?.data.user));
           setShowSuccess(true);
           // Redirect to dashboard or show success message

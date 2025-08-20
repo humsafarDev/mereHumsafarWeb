@@ -4,14 +4,18 @@ import { Link, NavLink } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
 import logo from "../../assets/logo.png";
 import headerBottom from "../../assets/headerbottom.png";
+import { isValid } from '../../Utils/common';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userData = JSON.parse(localStorage.getItem('userData')) || {};
   const navLinks = [
     { label: 'Home', path: '/' },
+    { label: 'Profile', path: '/dashboard/profile' },
     { label: 'Browse', path: '/browse' },
     { label: 'Success Stories', path: '/success-stories' },
     { label: 'Privacy', path: '/privacy' },
+
     { label: 'About Us', path: '/about' },
     { label: 'Contact', path: '/contact' },
   ];
@@ -20,13 +24,15 @@ const Header = () => {
     <>
       {/* Desktop Header */}
       <header className="hidden md:flex justify-between items-center px-6 py-4 bg-primary shadow text-black">
-        <Link to="/" className="flex-shrink-0">
+      {
+        isValid(userData?.id) ?     <Link to="/dashboard" className="flex-shrink-0">
+          <img src={logo} alt="logo" className='h-12 w-auto' />
+        </Link>  :   <Link to="/login" className="flex-shrink-0">
           <img src={logo} alt="logo" className='h-12 w-auto' />
         </Link>
-        <Link to="/registration" className="flex-shrink-0">
-          <img src={logo} alt="logo" className='h-12 w-auto' />
-        </Link>
-       
+      }
+      
+
         <nav className="flex items-center space-x-8 relative">
           {navLinks.map((link) => (
             <NavLink
@@ -69,7 +75,7 @@ const Header = () => {
 
       {/* Mobile Header */}
       <header className="md:hidden flex justify-between items-center px-4 py-3 bg-primary shadow text-black">
-        <Link to="/" className="flex-shrink-0">
+        <Link to="/dashboard" className="flex-shrink-0">
           <img src={logo} alt="logo" className='h-10 w-auto' />
         </Link>
         
@@ -89,6 +95,10 @@ const Header = () => {
             <Link to="/" className="flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
               <img src={logo} alt="logo" className='h-10 w-auto' />
             </Link>
+            <Link to="/dashboard" className="flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
+              {/* <img src={logo} alt="logo" className='h-10 w-auto' /> */}Dashboard
+            </Link>
+           
             <button 
               onClick={() => setMobileMenuOpen(false)}
               className="p-2 text-gray-700 hover:text-secondary"
@@ -109,7 +119,7 @@ const Header = () => {
                   }`
                 }
               >
-                {link.label}
+                {link.label} 
               </NavLink>
             ))}
           </nav>
