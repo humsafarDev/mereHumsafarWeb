@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./conponents/widget/Layout";
 import Home from "./screens/Home";
@@ -22,9 +22,48 @@ import DashboardWidgets from "./screens/Dashboard/screens/DashboardWidgets";
 
 import PrivateRoute from "./conponents/PrivateRoute";
 import Registration from "./screens/Registration";
+import axios from "axios";
+import { baseUrl } from "./Utils/baseUrl";
 
 
 function App() {
+
+  const [appsettingData, setAppSettingData] = useState(null)
+
+
+  const fetchAppSetting = async () => {
+  
+      const response = await axios.get(`${baseUrl}/api/master/app-setting`)
+
+      if(response.status === 200){
+          setAppSettingData(response?.data)
+         
+      }
+      
+  }
+
+  useEffect(() => {
+fetchAppSetting()
+  }, [])
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const colors = appsettingData?.themeColor;
+
+    // loop करके सारे variables set कर दो
+    if(colors?.id){
+
+    
+    Object.entries(colors).forEach(([key, value]) => {
+      if (key !== "id" && key !== "title" && value) {
+        const cssVar = "--color-" + key.replace(/([A-Z])/g, "-$1").toLowerCase();
+        root.style.setProperty(cssVar, value);
+
+        console.log(cssVar, "cssvar")
+      }
+    });
+  }
+  }, [appsettingData]);
 
 //create a function if user token is exist in localStorage then redirect to dashboard otherwise redirect to login page
 

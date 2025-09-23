@@ -239,6 +239,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { baseUrl } from "../Utils/baseUrl";
 
 const slides = [
   {
@@ -274,7 +275,7 @@ const [bannerData, setBannerData] = useState([]);
   }, []);
   const fetchBanner = async() => {
 
-    const res =await axios.get("https://merehumsafar-backend.onrender.com/api/master/banner");
+    const res =await axios.get(`${baseUrl}/api/master/banner`);
     
     console.log("banner data", res.data);
     setBannerData(res.data);  

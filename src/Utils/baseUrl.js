@@ -1,0 +1,1 @@
+export const baseUrl = "https://merehumsafar-backend.onrender.com"
