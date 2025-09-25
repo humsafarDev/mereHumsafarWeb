@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { FaUser, FaHeart, FaImage, FaCog, FaSearch, FaEnvelope, FaLock, FaStar } from 'react-icons/fa';
 import { isValid } from '../../../Utils/common'; // Assuming you have a package for email validation
 import axios from 'axios';
+import { baseUrl } from '../../../Utils/baseUrl';
 
 function DashboardWidgets() {
   // Fake data for matrimonial site
@@ -18,7 +19,7 @@ function DashboardWidgets() {
     const promise = async () => {
       try {
 
-        const response = await fetch(`https://merehumsafar-backend.onrender.com/api/master/profile/${userData?.email}`);
+        const response = await fetch(`${baseUrl}/api/master/profile/${userData?.email}`);
 
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -54,7 +55,10 @@ function DashboardWidgets() {
     return age;
   };
   const profileData = {
-    name: profiledata?.name,
+    firstName: profiledata?.firstName,
+    middleName: profiledata?.middleName,
+    lastName: profiledata?.lastName,
+    
     age: findAge(profiledata?.dateOfBirth), // Assuming dob is in 'YYYY-MM-DD' format
     email: profiledata?.email,  
    
@@ -85,7 +89,7 @@ function DashboardWidgets() {
   
       // Step 1: Upload image
       const uploadRes = await axios.post(
-        'https://merehumsafar-backend.onrender.com/api/master/profile/upload',
+        `${baseUrl}/api/master/profile/upload`,
         formData
       );
   
@@ -99,14 +103,14 @@ function DashboardWidgets() {
         const email = profiledata?.email;
   
         const updateRes = await axios.put(
-          `https://merehumsafar-backend.onrender.com/api/master/complete-profile?email=${email}`,
+          `${baseUrl}/api/master/complete-profile?email=${email}`,
           { uploadedImageId }
         );
   
         if (updateRes.status === 200) {
           // Step 3: Fetch latest profile
           const latestProfileRes = await fetch(
-            `https://merehumsafar-backend.onrender.com/api/master/profile/${email}`
+            `${baseUrl}/api/master/profile/${email}`
           );
   
           if (!latestProfileRes.ok) {
@@ -154,7 +158,7 @@ function DashboardWidgets() {
             <div className="relative w-24 h-24">
               {/* Profile Image */}
               <img
-                src={`https://merehumsafar-backend.onrender.com${profiledata?.uploadedImage?.imagePath}`} // fallback image
+                src={`${baseUrl}${profiledata?.uploadedImage?.imagePath}`} // fallback image
                 alt="Profile"
                 className="w-24 h-24 rounded-full object-cover border-2 border-white"
               />
@@ -187,7 +191,7 @@ function DashboardWidgets() {
               </label>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-800">{profileData.name}, {profileData.age}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{profileData.firstName}, {profileData.age}</h2>
               <p className="text-gray-600">{profileData.profession}</p>
               <p className="text-gray-500 text-sm mt-1 flex items-center gap-1">
                 <FaSearch className="text-blue-500" /> {`${profiledata?.country}, ${profiledata?.state}, ${profiledata?.city}`}

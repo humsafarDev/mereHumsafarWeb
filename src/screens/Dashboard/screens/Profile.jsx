@@ -3,6 +3,7 @@ import { FiEdit2, FiHeart, FiShare2, FiMessageSquare, FiUser, FiMapPin, FiPhone,
 import { FaPrayingHands, FaQuran, FaMosque, FaFemale, FaHandsHelping, FaHome, FaUserFriends } from 'react-icons/fa';
 import { isValid } from '../../../Utils/common';
 import axios from 'axios';
+import { baseUrl } from '../../../Utils/baseUrl';
 
 function Profile() {
   const userData = JSON.parse(localStorage.getItem("userData"));
@@ -18,7 +19,7 @@ function Profile() {
       const promise = async () => {
         try {
   
-          const response = await fetch(`https://merehumsafar-backend.onrender.com/api/master/profile/${userData?.email}`);
+          const response = await fetch(`${baseUrl}/api/master/profile/${userData?.email}`);
   
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -118,7 +119,7 @@ function Profile() {
   
       // Step 1: Upload image
       const uploadRes = await axios.post(
-        'https://merehumsafar-backend.onrender.com/api/master/profile/upload',
+        `${baseUrl}/api/master/profile/upload`,
         formData
       );
   
@@ -132,14 +133,14 @@ function Profile() {
         const email = profiledata?.email;
   
         const updateRes = await axios.put(
-          `https://merehumsafar-backend.onrender.com/api/master/complete-profile?email=${email}`,
+          `${baseUrl}/api/master/complete-profile?email=${email}`,
           { uploadedImageId }
         );
   
         if (updateRes.status === 200) {
           // Step 3: Fetch latest profile
           const latestProfileRes = await fetch(
-            `https://merehumsafar-backend.onrender.com/api/master/profile/${email}`
+            `${baseUrl}/api/master/profile/${email}`
           );
   
           if (!latestProfileRes.ok) {
@@ -175,7 +176,7 @@ function Profile() {
           <div className="relative w-24 h-24">
               {/* Profile Image */}
               <img
-                src={`https://merehumsafar-backend.onrender.com${profiledata?.uploadedImage?.imagePath}`} // fallback image
+                src={`${baseUrl}${profiledata?.uploadedImage?.imagePath}`} // fallback image
                 alt="Profile"
                 className="w-24 h-24 rounded-full object-cover border-2 border-white"
               />
@@ -208,52 +209,25 @@ function Profile() {
               </label>
             </div>
             <div className="ml-4">
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={profileData?.name}
-                  onChange={handleInputChange}
-                  className="text-2xl font-bold bg-gray-50 rounded px-2 py-1 border border-gray-200"
-                />
-              ) : (
-                <h1 className="text-2xl font-bold text-gray-800">{profileData?.name}, {profileData?.age}</h1>
-              )}
+                            <h1 className="text-2xl font-bold text-gray-800">{profiledata?.firstName}, {profileData?.age}</h1>
+              
               <div className="flex items-center text-secondary/80 mt-1">
                 <FaFemale className="mr-1" />
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="profession"
-                    value={profileData?.profession}
-                    onChange={handleInputChange}
-                    className="bg-gray-50 rounded px-2 py-1 border border-gray-200"
-                  />
-                ) : (
-                  <span>{profileData?.profession}</span>
-                )}
+                                 <span>{profileData?.profession}</span>
+                
               </div>
               <div className="flex items-center text-gray-500 text-sm mt-1">
                 <FiMapPin className="mr-1" />
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="location"
-                    value={profileData?.location}
-                    onChange={handleInputChange}
-                    className="bg-gray-50 rounded px-2 py-1 border border-gray-200"
-                  />
-                ) : (
-                  <span>{profileData?.location}</span>
-                )}
+                              <span>{profileData?.location}</span>
+                
               </div>
             </div>
           </div>
           <button 
-            onClick={() => setIsEditing(!isEditing)}
+            // onClick={() => setIsEditing(!isEditing)}
             className="bg-secondary/10 text-secondary p-2 rounded-full hover:bg-secondary/20 transition-all"
           >
-            {isEditing ? <FiSave className="w-5 h-5" /> : <FiEdit className="w-5 h-5" />}
+             <FiEdit className="w-5 h-5" />
           </button>
         </div>
 
@@ -265,65 +239,34 @@ function Profile() {
               <FiUser className="text-secondary mr-2 text-lg" />
               <h3 className="text-xl font-semibold text-gray-800">About Me</h3>
             </div>
-            {isEditing ? (
-              <textarea
-                name="about"
-                value={profileData?.about}
-                onChange={handleInputChange}
-                className="w-full bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 min-h-[100px]"
-              />
-            ) : (
+           
               <p className="text-gray-700 leading-relaxed">{profileData?.about}</p>
-            )}
+            
             
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-start">
                   <div className="w-32 text-gray-500 font-medium">Height</div>
                   <div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="height"
-                        value={profileData?.height}
-                        onChange={handleInputChange}
-                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
-                      />
-                    ) : (
+                   
                       <span className="text-gray-700">{profileData?.height}</span>
-                    )}
+                    
                   </div>
                 </div>
                 <div className="flex items-start">
                   <div className="w-32 text-gray-500 font-medium">Education</div>
                   <div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="education"
-                        value={profileData?.education}
-                        onChange={handleInputChange}
-                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
-                      />
-                    ) : (
+                  
                       <span className="text-gray-700">{profileData?.education}</span>
-                    )}
+                    
                   </div>
                 </div>
                 <div className="flex items-start">
                   <div className="w-32 text-gray-500 font-medium">Income</div>
                   <div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="income"
-                        value={profileData?.income}
-                        onChange={handleInputChange}
-                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
-                      />
-                    ) : (
+                   
                       <span className="text-gray-700">{profileData?.income}</span>
-                    )}
+                    
                   </div>
                 </div>
               </div>
@@ -353,33 +296,17 @@ function Profile() {
                 <div className="flex items-start">
                   <div className="w-32 text-gray-500 font-medium">Father</div>
                   <div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="father"
-                        value={profileData?.family?.father}
-                        onChange={(e) => handleNestedInputChange('family', e)}
-                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
-                      />
-                    ) : (
+                  
                       <span className="text-gray-700">{profileData?.family?.father}</span>
-                    )}
+                    
                   </div>
                 </div>
                 <div className="flex items-start">
                   <div className="w-32 text-gray-500 font-medium">Mother</div>
                   <div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="mother"
-                        value={profileData?.family?.mother}
-                        onChange={(e) => handleNestedInputChange('family', e)}
-                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
-                      />
-                    ) : (
+                  
                       <span className="text-gray-700">{profileData.family.mother}</span>
-                    )}
+                  
                   </div>
                 </div>
               </div>
@@ -387,17 +314,8 @@ function Profile() {
                 <div className="flex items-start">
                   <div className="w-32 text-gray-500 font-medium">Siblings</div>
                   <div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="siblings"
-                        value={profileData?.family?.siblings}
-                        onChange={(e) => handleNestedInputChange('family', e)}
-                        className="bg-gray-50 rounded px-2 py-1 border border-gray-200 w-full"
-                      />
-                    ) : (
-                      <span className="text-gray-700">{profileData.family.siblings}</span>
-                    )}
+                                          <span className="text-gray-700">{profileData.family.siblings}</span>
+                    
                   </div>
                 </div>
               </div>
@@ -416,68 +334,35 @@ function Profile() {
                   <FaPrayingHands className="mr-2" />
                   <span className="font-medium">Salah</span>
                 </div>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="salah"
-                    value={profileData?.religiousPractices?.salah}
-                    onChange={(e) => handleNestedInputChange('religiousPractices', e)}
-                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
-                  />
-                ) : (
+               
                   <p className="text-gray-700">{profileData?.religiousPractices?.salah}</p>
-                )}
+                
               </div>
               <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
                 <div className="flex items-center text-secondary mb-2">
                   <FaQuran className="mr-2" />
                   <span className="font-medium">Quran</span>
                 </div>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="quran"
-                    value={profileData?.religiousPractices?.quran}
-                    onChange={(e) => handleNestedInputChange('religiousPractices', e)}
-                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
-                  />
-                ) : (
+              
                   <p className="text-gray-700">{profileData?.religiousPractices?.quran}</p>
-                )}
+                
               </div>
               <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
                 <div className="flex items-center text-secondary mb-2">
                   <FaMosque className="mr-2" />
                   <span className="font-medium">Sect</span>
                 </div>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="sect"
-                    value={profileData?.sect}
-                    onChange={handleInputChange}
-                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
-                  />
-                ) : (
+               
                   <p className="text-gray-700">{profileData.sect}</p>
-                )}
+                
               </div>
               <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-4 rounded-lg border border-secondary/10">
                 <div className="flex items-center text-secondary mb-2">
                   <FaFemale className="mr-2" />
                   <span className="font-medium">Hijab</span>
                 </div>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="hijab"
-                    value={profileData?.religiousPractices.hijab}
-                    onChange={(e) => handleNestedInputChange('religiousPractices', e)}
-                    className="bg-white rounded px-2 py-1 border border-gray-200 w-full"
-                  />
-                ) : (
-                  <p className="text-gray-700">{profileData?.religiousPractices?.hijab}</p>
-                )}
+                                 <p className="text-gray-700">{profileData?.religiousPractices?.hijab}</p>
+              
               </div>
             </div>
           </div>

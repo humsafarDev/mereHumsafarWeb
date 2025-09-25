@@ -5,6 +5,7 @@ import { GiLovers } from 'react-icons/gi';
 import axiosInstance from '../utils/axiosInstance'; // Adjust the import based on your project structure
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { baseUrl } from '../Utils/baseUrl';
 const EmailOtpLogin = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,7 @@ const EmailOtpLogin = () => {
     setIsLoading(true);
     try {
       if (!otpSent) {
-        const response = await axiosInstance.post('https://merehumsafar-backend.onrender.com/api/auth/login', data)
+        const response = await axiosInstance.post(`${baseUrl}/api/auth/login`, data)
       
          console.log(response)
         console.log('OTP sent to:', data.email);
@@ -32,7 +33,7 @@ const EmailOtpLogin = () => {
       } else {
         console.log('OTP verified for:', data.email, 'OTP:', data.otp);
         if (data.otp.length === 6) {
-          const otpResponse = await axios.post('https://merehumsafar-backend.onrender.com/api/auth/verify', {
+          const otpResponse = await axios.post(`${baseUrl}/api/auth/verify`, {
             email: data.email,
             otp: data.otp
           });

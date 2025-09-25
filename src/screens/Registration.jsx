@@ -7,6 +7,7 @@ import Select from 'react-select';
 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../Utils/baseUrl';
 
 const SignupPage = () => {
   const {
@@ -31,7 +32,9 @@ const navigate = useNavigate();
     const modified = {
       ...data,
       motherTongueId: data.motherTongueId || null,
-      name: data.name.trim(), // Trim whitespace from name
+      firstName: data?.firstName?.trim(), // Trim whitespace from name
+      middleName: data?.middleName?.trim(),
+      lastName: data?.lastName?.trim(),
       liveWithFamily: data.liveWithFamily ?? null,
       height: parseInt(data.height) ?? null,
       country: data.country?.label || null,
@@ -42,7 +45,7 @@ const navigate = useNavigate();
   
     try {
       const makeProfileResponse = await axios.put(
-        `https://merehumsafar-backend.onrender.com/api/master/complete-profile?email=${userData.email}`,
+        `${baseUrl}/api/master/complete-profile?email=${userData.email}`,
         modified
       );
   
@@ -79,12 +82,12 @@ const navigate = useNavigate();
         casteResult,
         motherTongueResult
       ] = await Promise.allSettled([
-        axios.get('https://merehumsafar-backend.onrender.com/api/master/education'),
-        axios.get('https://merehumsafar-backend.onrender.com/api/master/occupation'),
-        axios.get('https://merehumsafar-backend.onrender.com/api/master/employed-in'),
-        axios.get('https://merehumsafar-backend.onrender.com/api/master/marital'),
-        axios.get('https://merehumsafar-backend.onrender.com/api/master/caste'),
-        axios.get('https://merehumsafar-backend.onrender.com/api/master/mother-tongue')
+        axios.get(`${baseUrl}/api/master/education`),
+        axios.get(`${baseUrl}/api/master/occupation`),
+        axios.get(`${baseUrl}/api/master/employed-in`),
+        axios.get(`${baseUrl}/api/master/marital`),
+        axios.get(`${baseUrl}/api/master/caste`),
+        axios.get(`${baseUrl}/api/master/language`)
       ]);
   
       if (educationResult.status === 'fulfilled') {
@@ -161,31 +164,81 @@ const navigate = useNavigate();
             {
               step == 1 &&
               <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                {/* Name */}
+                {/* First Name */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="name">
-                    Full Name
+                  <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="firstName">
+                    First Name
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary">
                       <FaUser />
                     </div>
                     <input
-                      id="name"
+                      id="firstName"
                       type="text"
 
-                      className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.name ? 'border-red-500' : 'border-gray-300'} focus:ring-0  focus:border-secondary outline-none transition`}
-                      placeholder="Enter your Full Name"
-                      {...register('name', {
-                        required: 'Name is required',
+                      className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} focus:ring-0  focus:border-secondary outline-none transition`}
+                      placeholder="Enter your First Name"
+                      {...register('firstName', {
+                        required: 'First Name is required',
                         minLength: { value: 2, message: 'Minimum 2 characters' },
                         maxLength: { value: 50, message: 'Maximum 50 characters' }
 
                       })}
                     />
                   </div>
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                  {errors.firstName && (
+                    <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+                  )}
+                </div>
+                {/* Middle Name */}
+                <div className="mb-6">
+                  <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="middleName">
+                    Middle Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary">
+                      <FaUser />
+                    </div>
+                    <input
+                      id="middleName"
+                      type="text"
+
+                      className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.middleName ? 'border-red-500' : 'border-gray-300'} focus:ring-0  focus:border-secondary outline-none transition`}
+                      placeholder="Enter your Middle Name"
+                      {...register('middleName')}
+                    />
+                  </div>
+                  {errors.middleName && (
+                    <p className="mt-1 text-sm text-red-600">{errors.middleName.message}</p>
+                  )}
+                </div>
+
+                {/* LastName */}
+                <div className="mb-6">
+                  <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="name">
+                    Last Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary">
+                      <FaUser />
+                    </div>
+                    <input
+                      id="lastName"
+                      type="text"
+
+                      className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} focus:ring-0  focus:border-secondary outline-none transition`}
+                      placeholder="Enter your Last Name"
+                      {...register('lastName', {
+                        required: 'Last Name is required',
+                        minLength: { value: 2, message: 'Minimum 2 characters' },
+                        maxLength: { value: 50, message: 'Maximum 50 characters' }
+
+                      })}
+                    />
+                  </div>
+                  {errors.lastName && (
+                    <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
                   )}
                 </div>
                 {/* Phone Number */}

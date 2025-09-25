@@ -6,6 +6,7 @@ import axiosInstance from '../utils/axiosInstance'; // Adjust the import based o
 import { NavLink, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import axios from 'axios';
+import { baseUrl } from '../Utils/baseUrl';
 const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +27,7 @@ const Signup = () => {
     // Fetch profileFor options from the API
     const fetchProfileFor = async () => {
       try {
-        const response = await axios.get('https://merehumsafar-backend.onrender.com/api/master/profile-for');
+        const response = await axios.get(`${baseUrl}/api/master/profile-for`);
         setProfileFor(response.data);
       } catch (error) {
         console.error('Error fetching profileFor options:', error);
@@ -46,10 +47,11 @@ const Signup = () => {
       const { email, profileForId, otp } = data;
   
       if (!otpSent) {
-        await axios.post('https://merehumsafar-backend.onrender.com/api/auth/signup', {
+        await axios.post(`${baseUrl}/api/auth/signup`, {
           email,
           profileForId,
-          liveWithFamily: 1
+          liveWithFamily: 1,
+          isSubAdmin: "2",
         });
   
         console.log('OTP sent to:', email);
@@ -61,7 +63,7 @@ const Signup = () => {
           return;
         }
   
-        const otpResponse = await axiosInstance.post('https://merehumsafar-backend.onrender.com/api/auth/verify', {
+        const otpResponse = await axiosInstance.post(`${baseUrl}/api/auth/verify`, {
           email,
           otp,
         });
