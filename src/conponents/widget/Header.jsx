@@ -1,21 +1,22 @@
-
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
 import logo from "../../assets/logo.png";
 import headerBottom from "../../assets/headerbottom.png";
 import { isValid } from '../../Utils/common';
+import useBirthdayWish from '../../context/BirthdayCustomHook';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const userData = JSON.parse(localStorage.getItem('userData')) || {};
+  const userData = JSON.parse(localStorage.getItem('mereHumsafarUser')) || {};
+  const birthdayWish = useBirthdayWish();
+  
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Profile', path: '/dashboard/profile' },
     { label: 'Browse', path: '/browse' },
     { label: 'Success Stories', path: '/success-stories' },
     { label: 'Privacy', path: '/privacy' },
-
     { label: 'About Us', path: '/about' },
     { label: 'Contact', path: '/contact' },
   ];
@@ -23,68 +24,89 @@ const Header = () => {
   return (
     <>
       {/* Desktop Header */}
-      <header className="hidden md:flex justify-between items-center px-6 py-4 bg-primary shadow text-black">
-      {
-        isValid(userData?.id) ?     <Link to="/dashboard" className="flex-shrink-0">
-          <img src={logo} alt="logo" className='h-12 w-auto' />
-        </Link>  :   <Link to="/login" className="flex-shrink-0">
-          <img src={logo} alt="logo" className='h-12 w-auto' />
-        </Link>
-      }
-      
+      <header className="hidden md:flex flex-col bg-primary shadow text-black">
+        <div className="flex justify-between items-center px-6 py-4">
+          {
+            isValid(userData?.id) ? (
+              <Link to="/browse" className="flex-shrink-0">
+                <img src={logo} alt="logo" className='h-12 w-auto' />
+              </Link>
+            ) : (
+              <Link to="/login" className="flex-shrink-0">
+                <img src={logo} alt="logo" className='h-12 w-auto' />
+              </Link>
+            )
+          }
 
-        <nav className="flex items-center space-x-8 relative">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) =>
-                `relative py-3 font-medium group transition-colors ${
-                  isActive ? 'text-secondary' : 'text-gray-700 hover:text-secondary'
-                }`
-              }
+          <nav className="flex items-center space-x-8 relative">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) =>
+                  `relative py-3 font-medium group transition-colors ${
+                    isActive ? 'text-secondary' : 'text-gray-700 hover:text-secondary'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className="relative z-10">{link.label}</span>
+                    <div className={`absolute -bottom-3 left-0 right-0 mx-auto transition-all duration-300 ${
+                      isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-50 '
+                    }`}>
+                      <img 
+                        src={headerBottom} 
+                        alt="" 
+                        className="h-12 w-full max-w-[80px] mx-auto object-contain" 
+                      />
+                    </div>
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex-shrink-0 space-x-4">
+            <Link to="/login" className="text-secondary font-medium hover:underline">Login</Link>
+            <Link 
+              to="/signup" 
+              className="bg-gradient-to-br from-secondarydark to-secondary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium shadow-md hover:shadow-lg"
             >
-              {({ isActive }) => (
-                <>
-                  <span className="relative z-10">{link.label}</span>
-                  <div className={`absolute -bottom-3 left-0 right-0 mx-auto transition-all duration-300 ${
-                    isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-50 '
-                  }`}>
-                    <img 
-                      src={headerBottom} 
-                      alt="" 
-                      className="h-12 w-full max-w-[80px] mx-auto object-contain" 
-                    />
-                  </div>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="flex-shrink-0 space-x-4">
-          <Link to="/login" className="text-secondary font-medium hover:underline">Login</Link>
-          <Link 
-            to="/signup" 
-            className="bg-gradient-to-br from-secondarydark to-secondary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium shadow-md hover:shadow-lg"
-          >
-            Signup
-          </Link>
+              Signup
+            </Link>
+          </div>
         </div>
+
+        {/* 🎉 Birthday Banner */}
+        {birthdayWish && (
+          <div className="bg-yellow-100 text-yellow-800 text-center py-2 font-semibold shadow-inner animate-bounce">
+            {birthdayWish}
+          </div>
+        )}
       </header>
 
       {/* Mobile Header */}
-      <header className="md:hidden flex justify-between items-center px-4 py-3 bg-primary shadow text-black">
-        <Link to="/dashboard" className="flex-shrink-0">
-          <img src={logo} alt="logo" className='h-10 w-auto' />
-        </Link>
-        
-        <button 
-          onClick={() => setMobileMenuOpen(true)}
-          className="p-2 text-gray-700 hover:text-secondary"
-        >
-          <FiMenu size={24} />
-        </button>
+      <header className="md:hidden flex flex-col bg-primary shadow text-black">
+        <div className="flex justify-between items-center px-4 py-3">
+          <Link to="/browse" className="flex-shrink-0">
+            <img src={logo} alt="logo" className='h-10 w-auto' />
+          </Link>
+          
+          <button 
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 text-gray-700 hover:text-secondary"
+          >
+            <FiMenu size={24} />
+          </button>
+        </div>
+
+        {/* 🎉 Mobile Birthday Banner */}
+        {birthdayWish && (
+          <div className="bg-yellow-100 text-yellow-800 text-center py-2 font-semibold shadow-inner animate-pulse">
+            {birthdayWish}
+          </div>
+        )}
       </header>
 
       {/* Mobile Sidebar */}
@@ -95,8 +117,8 @@ const Header = () => {
             <Link to="/" className="flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
               <img src={logo} alt="logo" className='h-10 w-auto' />
             </Link>
-            <Link to="/dashboard" className="flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
-              {/* <img src={logo} alt="logo" className='h-10 w-auto' /> */}Dashboard
+            <Link to="/browse" className="flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
+              Dashboard
             </Link>
            
             <button 

@@ -7,11 +7,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import axios from 'axios';
 import { baseUrl } from '../Utils/baseUrl';
+import { Dropdown } from "primereact/dropdown";
 const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [profileFor, setProfileFor] = useState([]); // New state for profileFor
+  const [selectedProfileFor, setSelectedProfileFor] =useState(null)
   const navigate = useNavigate();
   const { 
     register, 
@@ -71,7 +73,7 @@ const Signup = () => {
         const { token, user } = otpResponse.data;
   
         localStorage.setItem('mereHumsafarToken', token);
-        localStorage.setItem('userData', JSON.stringify(user));
+        localStorage.setItem('mereHumsafarUser', JSON.stringify(user));
   
         console.log('OTP verified successfully');
         setShowSuccess(true);
@@ -165,20 +167,18 @@ const Signup = () => {
     <label className="block text-gray-700 text-sm font-medium mb-2">
       Profile For
     </label>
-    <Select
-      options={profileFor?.map((d) => {
-
-        return { label: d.name, value: d.id };
-      })}
-      isDisabled={otpSent}
-      value={profileFor.find(opt => opt.value === profileFor)}
-      onChange={(selectedOption) => {
-        setValue('profileForId', selectedOption?.value, { shouldValidate: true });
-      }}
-       classNamePrefix="custom-select"
-  className="w-full"
-      placeholder="Select Profile For"
-    />
+                       <Dropdown
+                         value={selectedProfileFor}                            // ✅ Controlled value
+                         onChange={(e) => {                                    // ✅ Update both state & react-hook-form
+                           setSelectedProfileFor(e.value);
+                           console.log("profileForId ", e?.value)
+                           setValue("profileForId", e?.value?.id || "");   // register field manually
+                         }}
+                         options={profileFor}                                  // ✅ Dropdown options
+                         optionLabel="name"                                     // ✅ Display name in dropdown
+                         placeholder="Select Profile For"
+                         className="w-full border border-primary-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all"
+                       />
     {/* Hidden input for react-hook-form to track */}
     <input
       type="hidden"

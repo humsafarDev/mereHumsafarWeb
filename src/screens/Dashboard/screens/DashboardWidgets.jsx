@@ -7,7 +7,7 @@ import { baseUrl } from '../../../Utils/baseUrl';
 function DashboardWidgets() {
   // Fake data for matrimonial site
 
-  const userData = JSON.parse(localStorage.getItem("userData"));
+  const userData = JSON.parse(localStorage.getItem("mereHumsafarUser"));
   const [loading , setLoading] = React.useState(false);
   const [profiledata, setProfileData] = React.useState(null);
   console.log("userData", userData);
@@ -20,7 +20,9 @@ function DashboardWidgets() {
       try {
 
         const response = await fetch(`${baseUrl}/api/master/profile/${userData?.email}`);
+        const  resUsers  = await fetch(`${baseUrl}/api/master/users`);
 
+        console.log(resUsers)
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -134,7 +136,9 @@ function DashboardWidgets() {
       setLoading(false); // Always hide loader
     }
   };
-  
+  const country = JSON?.parse(profiledata?.country ?? "{}")
+  const state = JSON?.parse(profiledata?.state??"{}")
+  const city = JSON?.parse(profiledata?.city??"{}")
   
 
 
@@ -194,7 +198,7 @@ function DashboardWidgets() {
               <h2 className="text-2xl font-bold text-gray-800">{profileData.firstName}, {profileData.age}</h2>
               <p className="text-gray-600">{profileData.profession}</p>
               <p className="text-gray-500 text-sm mt-1 flex items-center gap-1">
-                <FaSearch className="text-blue-500" /> {`${profiledata?.country}, ${profiledata?.state}, ${profiledata?.city}`}
+                <FaSearch className="text-blue-500" /> {`${country?.name}, ${state?.name}, ${city?.name}`}
               </p>
               <div className="mt-3">
                 <div className="flex justify-between text-sm mb-1">

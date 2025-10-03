@@ -140,7 +140,7 @@ import {
   FiX,
   FiHome,
 } from "react-icons/fi";
-import logo from "../../../../assets/logo.png";
+
 import { MdDashboard } from "react-icons/md";
 
 const navItems = [
@@ -179,7 +179,7 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
       >
         {/* Background */}
         <div className="absolute inset-0 md:rounded-2xl z-0 bg-[url('https://img.freepik.com/free-vector/realistic-blurred-floral-background_52683-63510.jpg')] bg-cover bg-no-repeat opacity-5" />
-        <div className="absolute inset-0 md:rounded-2xl bg-gradient-to-b from-secondary/5 via-secondary/5 to-secondary/5 z-0 opacity-40" />
+        <div className="absolute inset-0 md:rounded-2xl bg-gradient-to-b from-secondary-400 via-secondary-400 to-secondary-400 z-0 opacity-40" />
 
         {/* Sidebar Content */}
         <div className="relative z-10 flex flex-col h-full">
@@ -192,7 +192,7 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
 
           <nav className="flex-1 p-1 py-6">
             <ul className="space-y-6 flex flex-col items-center juatify-center">
-              {navItems.map(({ path, name, icon }) => {
+              {navItems.map(({ path, icon }) => {
                 const isActive = activeItem === path;
                 return (
                   <li key={path}>
@@ -209,7 +209,7 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
                         <div
                           className={`p-2 rounded-lg ${
                             isActive
-                              ? "bg-primary/10"
+                              ? "bg-primary-10"
                               : "bg-white/5 group-hover:bg-white/10"
                           }`}
                         >
@@ -231,7 +231,7 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
 
       <div className="w-[100vw] h-14 flex justify-center items-center fixed  bottom-2 p-2 md:hidden block">
          <ul className="flex items-center justify-between backdrop-blur-lg w-[90%] border p-1 bg-white/20 rounded-2xl">
-              {navItems.map(({ path, name, icon }) => {
+              {navItems.map(({ path,  icon }) => {
                 const isActive = activeItem === path;
                 return (
                   <li key={path}>
@@ -240,7 +240,7 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
                       onClick={() => setActiveItem(path)}
                       className={`flex items-center justify-evenly rounded-xl transition-all group ${
                         isActive
-                          ? "bg-secondary text-primary font-semibold"
+                          ? "bg-secondary-400 text-primary-200 font-semibold"
                           : "text-secondary "
                       }`}
                     >

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { FaEnvelope, FaLock, FaHeart, FaArrowRight, FaPhone, FaCalendar, FaUser, FaGlobe, FaArrowLeft } from 'react-icons/fa';
 import { GiLovers } from 'react-icons/gi';
 import { Country, State, City } from 'country-state-city';
 import Select from 'react-select';
-
+import { Dropdown } from "primereact/dropdown";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { baseUrl } from '../Utils/baseUrl';
+import { Calendar } from 'primereact/calendar';
 
-const SignupPage = () => {
+const Registration = () => {
   const {
     register,
     handleSubmit,
     trigger,
     watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm();
@@ -26,20 +28,26 @@ const navigate = useNavigate();
   const [marital, setMarital] = useState([]);
   const [caste, setCaste] = useState([]);
   const [motherTongue, setMotherTongue] = useState([]);
+  // const [selectedCountry, setSelectedCountry] = useState(null)
+  const [selectedCountry, setSelectedCountry] = useState(null);
+const [selectedState, setSelectedState] = useState(null);
+const [selectedCity, setSelectedCity] = useState(null);
+
   //get userData from localStorage
-  const userData = JSON.parse(localStorage.getItem('userData')) || {};
+  const userData = JSON.parse(localStorage.getItem('mereHumsafarUser')) || {};
   const onSubmit = async (data) => {
     const modified = {
       ...data,
+      
       motherTongueId: data.motherTongueId || null,
       firstName: data?.firstName?.trim(), // Trim whitespace from name
       middleName: data?.middleName?.trim(),
       lastName: data?.lastName?.trim(),
       liveWithFamily: data.liveWithFamily ?? null,
       height: parseInt(data.height) ?? null,
-      country: data.country?.label || null,
-      state: data.state?.label || null,
-      city: data.city ||null ,
+      country: JSON.stringify({name:data.country?.name, isoCode: data?.country?.isoCode}) || "",
+      state: JSON.stringify({name:data?.state?.name, isoCode:data?.state?.isoCode}) || "",
+      city: JSON.stringify({name:data?.city?.name, isoCode: data?.city?.isoCode}) ||"" ,
       profileForId: userData.profileFor?.id || null,
     };
   
@@ -141,7 +149,7 @@ const navigate = useNavigate();
     if (valid) setStep(step + 1);
   };
 
-
+console.log(watch())
 
   const prevStep = () => setStep(step - 1);
 
@@ -265,461 +273,338 @@ const navigate = useNavigate();
 
                 {/* Date Of Birth */}
                 <div>
-                  <label htmlFor="dateOfBirth" className="block text-gray-700 text-sm font-medium mb-2">Date Of Birth</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary">
-                      <FaCalendar />
-                    </div>
-                    <input
-                      datepicker
-                      id="default-datepicker"
-                      type="date"
+  <label
+    htmlFor="dateOfBirth"
+    className="block text-gray-700 text-sm font-medium mb-2"
+  >
+    Date Of Birth
+  </label>
 
-                      className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'} focus:ring-0 focus:border-secondary outline-none transition`}
-                      placeholder="Enter your Date Of Birth"
-                      {...register('dateOfBirth', {
-                        required: 'Date of Birth is required',
-                        minLength: { value: 2, message: 'Minimum 2 characters' },
-                        maxLength: { value: 50, message: 'Maximum 50 characters' }
-                      })}
-                    />
-                  </div>
-                  {errors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth.message}</p>}
-                </div>
+  {/* Use Controller for PrimeReact Calendar */}
+  <Controller
+    name="dateOfBirth"
+    control={control}
+    rules={{ required: "Date of Birth is required" }}
+    render={({ field }) => (
+      <Calendar
+        id="dateOfBirth"
+        value={field.value}
+        onChange={(e) => field.onChange(e.value)}
+        showIcon
+        placeholder="Select Date of Birth"
+        className="w-full px-4 py-3 border border-secondary-300 rounded-xl 
+                   focus:outline-none focus:ring-2 focus:ring-secondary-500 
+                   focus:border-transparent transition-all"
+      />
+    )}
+  />
 
+  {errors.dateOfBirth && (
+    <p className="text-red-500 text-sm mt-2">{errors.dateOfBirth.message}</p>
+  )}
+</div>
 
+            {/* Country */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Country
+  </label>
+  <Dropdown
+    value={selectedCountry}
+    onChange={(e) => {
+      setSelectedCountry(e.value);
+      setValue("country", e.value || "");
+      setSelectedState(null); // reset state on country change
+      setSelectedCity(null);  // reset city on country change
+    }}
+    options={Country.getAllCountries()}
+    filter
+    optionLabel="name"
+    placeholder="Select Country"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.country && (
+    <p className="text-red-500 text-sm mt-2">{errors.country.message}</p>
+  )}
+</div>
 
-                {/* Country */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Country
-                  </label>
-                  <Select
-                    options={Country.getAllCountries().map(country => ({
-                      value: country.isoCode,
-                      label: country.name
-                    }))}
+{/* State */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    State
+  </label>
+  <Dropdown
+    value={selectedState}
+    onChange={(e) => {
+      setSelectedState(e.value);
+      setValue("state", e.value || "");
+      setSelectedCity(null); // reset city on state change
+    }}
+    options={State.getStatesOfCountry(selectedCountry?.isoCode)}
+    optionLabel="name"
+    placeholder="Select State"
+    disabled={!selectedCountry?.isoCode}
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.state && (
+    <p className="text-red-500 text-sm mt-2">{errors.state.message}</p>
+  )}
+</div>
 
-
-                    onChange={(selectedOption) => {
-                      setValue('country', {
-                        value: selectedOption?.value,
-                        label: selectedOption?.label
-                      }, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Profile For"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('country', { required: 'Profile For is required' })}
-                  />
-                  {errors.profileForId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
-                  )}
-                </div>
-                {/* State */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    State
-                  </label>
-                  <Select
-                    options={State.getStatesOfCountry(watch("country")?.value)?.map(country => ({
-                      value: country.isoCode,
-                      label: country.name
-                    }))}
-                    isDisabled={!watch('country')}
-
-                    onChange={(selectedOption) => {
-                      setValue('state',  {
-                        value: selectedOption?.value,
-                        label: selectedOption?.label
-                      }, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select State"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('state', { required: 'Profile For is required' })}
-                  />
-                  {errors.profileForId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
-                  )}
-                </div>
-                {/* City */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    City
-                  </label>
-                  <Select
-                    options={City.getCitiesOfState(watch("country")?.value, watch("state")?.value)?.map(country => ({
-                      value: country.name,
-                      label: country.name
-                    }))}
-                    isDisabled={!watch('state') && !watch('country')}
-
-                    onChange={(selectedOption) => {
-                      setValue('city', selectedOption?.label, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select City"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('city', { required: 'Profile For is required' })}
-                  />
-                  {errors.profileForId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
-                  )}
-                </div>
+{/* City */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    City
+  </label>
+  <Dropdown
+    value={selectedCity}
+    onChange={(e) => {
+      setSelectedCity(e.value);
+      setValue("city", e.value || "");
+    }}
+    options={City.getCitiesOfState(selectedCountry?.isoCode, selectedState?.isoCode)}
+    optionLabel="name"
+    placeholder="Select City"
+    disabled={!selectedState?.isoCode}
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.city && (
+    <p className="text-red-500 text-sm mt-2">{errors.city.message}</p>
+  )}
+</div>
               </div>
             }
 
             {
               step == 2 &&
               <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                {/* Gender */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Gender
-                  </label>
-                  <Select
-                    options={genderOptions}
+              {/* Gender */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Gender
+  </label>
+  <Dropdown
+    value={watch("gender")}   // ✅ controlled with react-hook-form
+    onChange={(e) => setValue("gender", e.value, { shouldValidate: true })}
+    options={genderOptions.map((g) => ({
+      label: g.label,
+      value: g.value,
+    }))}
+    optionLabel="label"
+    placeholder="Select Gender"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.gender && (
+    <p className="text-red-500 text-sm mt-2">{errors.gender.message}</p>
+  )}
+</div>
+{/* Live With Family */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Live With Family Member
+  </label>
+  <Dropdown
+    value={watch("liveWithFamily")}
+    onChange={(e) => setValue("liveWithFamily", e.value, { shouldValidate: true })}
+    options={[
+      { label: "Yes", value: "1" },
+      { label: "No", value: "2" },
+    ]}
+    optionLabel="label"
+    placeholder="Select Option"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.liveWithFamily && (
+    <p className="text-red-500 text-sm mt-2">{errors.liveWithFamily.message}</p>
+  )}
+</div>
 
-                    onChange={(selectedOption) => {
-                      setValue('gender', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Gender"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('gender', { required: 'Gender is required' })}
-                  />
-                  {errors.profileForId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
-                  )}
-                </div>
+{/* Marital Status */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Marital Status
+  </label>
+  <Dropdown
+    value={watch("maritalStatusTypeId")}
+    onChange={(e) => setValue("maritalStatusTypeId", e.value, { shouldValidate: true })}
+    options={marital.map((status) => ({ label: status.name, value: status.id }))}
+    optionLabel="label"
+    placeholder="Select Marital Status"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.maritalStatusTypeId && (
+    <p className="text-red-500 text-sm mt-2">{errors.maritalStatusTypeId.message}</p>
+  )}
+</div>
 
-                {/* Live With Family  */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Live With Family Member
-                  </label>
-                  <Select
-                    options={[{
-                      label: "Yes",
-                      value: "1"
-                    }, {
-                      label: "No",
-                      value: "2"
-                    }]}
+{/* Mother Tongue */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Mother Tongue
+  </label>
+  <Dropdown
+    value={watch("motherTongueId")}
+    onChange={(e) => setValue("motherTongueId", e.value, { shouldValidate: true })}
+    options={motherTongue?.map((tongue) => ({ label: tongue.name, value: tongue.id }))}
+    optionLabel="label"
+    placeholder="Select Mother Tongue"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.motherTongueId && (
+    <p className="text-red-500 text-sm mt-2">{errors.motherTongueId.message}</p>
+  )}
+</div>
 
-                    onChange={(selectedOption) => {
-                      setValue('liveWithFamily', selectedOption?.value);
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Live With Family"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('gender')}
-                  />
-                  {errors.liveWithFamily && (
-                    <p className="mt-1 text-sm text-red-600">{errors.liveWithFamily.message}</p>
-                  )}
-                </div>
+{/* Caste */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Caste
+  </label>
+  <Dropdown
+    value={watch("casteTypeId")}
+    onChange={(e) => setValue("casteTypeId", e.value, { shouldValidate: true })}
+    options={caste.map((c) => ({ label: c.name, value: c.id }))}
+    optionLabel="label"
+    placeholder="Select Caste"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.casteTypeId && (
+    <p className="text-red-500 text-sm mt-2">{errors.casteTypeId.message}</p>
+  )}
+</div>
 
-                {/* Marital Status */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Marital Status
-                  </label>
-                  <Select
-                    options={
-                      marital.map((status) => ({
-                        label: status.name,
-                        value: status.id
-                      }))
-                    }
+{/* Height */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Height
+  </label>
+  <Dropdown
+    value={watch("height")}
+    onChange={(e) => setValue("height", e.value, { shouldValidate: true })}
+    options={[
+      { label: "4'0\"", value: "4'0\"" },
+      { label: "4'1\"", value: "4'1\"" },
+      { label: "4'2\"", value: "4'2\"" },
+      { label: "4'3\"", value: "4'3\"" },
+      { label: "4'4\"", value: "4'4\"" },
+      { label: "4'5\"", value: "4'5\"" },
+      { label: "4'6\"", value: "4'6\"" },
+      { label: "4'7\"", value: "4'7\"" },
+      { label: "4'8\"", value: "4'8\"" },
+      { label: "4'9\"", value: "4'9\"" },
+      { label: "5'0\"", value: "5'0\"" },
+      { label: "5'1\"", value: "5'1\"" },
+      { label: "5'2\"", value: "5'2\"" },
+      { label: "5'3\"", value: "5'3\"" },
+      { label: "5'4\"", value: "5'4\"" },
+      { label: "5'5\"", value: "5'5\"" },
+      { label: "5'6\"", value: "5'6\"" },
+      { label: "5'7\"", value: "5'7\"" },
+      { label: "5'8\"", value: "5'8\"" },
+      { label: "5'9\"", value: "5'9\"" },
+      { label: "6'", value: "6'" },
+      { label: "6'1\"", value: "6'1\"" },
+      { label: "6'2\"", value: "6'2\"" },
+      { label: "6'3\"", value: "6'3\"" },
+      { label: "6'4\"", value: "6'4\"" },
+      { label: "6'5\"", value: "6'5\"" },
+      { label: "6'6\"", value: "6'6\"" },
+      { label: "6'7\"", value: "6'7\"" },
+      { label: "6'8\"", value: "6'8\"" },
+      { label: "6'9\"", value: "6'9\"" },
+    ]}
+    optionLabel="label"
+    placeholder="Select Height"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.height && (
+    <p className="text-red-500 text-sm mt-2">{errors.height.message}</p>
+  )}
+</div>
 
-
-                    onChange={(selectedOption) => {
-                      setValue('maritalStatusTypeId', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Marital Status"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('maritalStatusTypeId', { required: 'Marital Status is required' })}
-                  />
-                  {errors.maritalStatusTypeId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.maritalStatusTypeId.message}</p>
-                  )}
-                </div>
-                {/* Mother Tongue */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Mother Tongue
-                  </label>
-                  <Select
-                    options={
-                      motherTongue?.map((tongue) => ({
-                        label: tongue.name,
-                        value: tongue.id
-                      }))
-                    }
-
-                    onChange={(selectedOption) => {
-                      setValue('motherTongueId', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Mother Tongue"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('motherTongueId', { required: 'mother Tongue is required' })}
-                  />
-                  {errors.motherTongueId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.motherTongue.message}</p>
-                  )}
-                </div>
-                {/* Caste */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Caste
-                  </label>
-                  <Select
-                    options={
-                      caste.map((caste) => ({
-                        label: caste.name,
-                        value: caste.id
-                      }))
-                    }
-
-
-                    onChange={(selectedOption) => {
-                      setValue('casteTypeId', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Caste"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('casteTypeId', { required: 'Caste is required' })}
-                  />
-                  {errors.casteTypeId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.casteTypeId.message}</p>
-                  )}
-                </div>
-                {/* Height */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Height
-                  </label>
-                  <Select
-                    options={
-                      [
-                        { label: "4'0\"", value: "4'0\"" },
-
-                        { label: "4'1\"", value: "4'1\"" },
-                        { label: "4'2\"", value: "4'2\"" },
-                        { label: "4'3\"", value: "4'3\"" },
-                        { label: "4'4\"", value: "4'4\"" },
-                        { label: "4'5\"", value: "4'5\"" },
-                        { label: "4'6\"", value: "4'6\"" },
-                        { label: "4'7\"", value: "4'7\"" },
-                        { label: "4'8\"", value: "4'8\"" },
-                        { label: "4'9\"", value: "4'9\"" },
-                        { label: "5'0\"", value: "5'0\"" },
-                        { label: "5'1\"", value: "5'1\"" },
-                        { label: "5'2\"", value: "5'2\"" },
-                        { label: "5'3\"", value: "5'3\"" },
-                        { label: "5'4\"", value: "5'4\"" },
-                        { label: "5'5\"", value: "5'5\"" },
-                        { label: "5'6\"", value: "5'6\"" },
-                        { label: "5'7\"", value: "5'7\"" },
-                        { label: "5'8\"", value: "5'8\"" },
-                        { label: "5'9\"", value: "5'9\"" },
-                        { label: "6'", value: '6"' },
-                        { label: "6'1\"", value: "6'1\"" },
-                        { label: "6'2\"", value: "6'2\"" },
-                        { label: "6'3\"", value: "6'3\"" },
-                        { label: "6'4\"", value: "6'4\"" },
-                        { label: "6'5\"", value: "6'5\"" },
-                        { label: "6'6\"", value: "6'6\"" },
-                        { label: "6'7\"", value: "6'7\"" },
-                        { label: "6'8\"", value: "6'8\"" },
-                        { label: "6'9\"", value: "6'9\"" }
-                      ]
-                    }
-
-
-                    onChange={(selectedOption) => {
-                      setValue('height', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Height"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('height', { required: 'Height is required' })}
-                  />
-                  {errors.height && (
-                    <p className="mt-1 text-sm text-red-600">{errors.height.message}</p>
-                  )}
-                </div>
               </div>
             }
 
             {
               step == 3 && <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                {/* Heighest Education */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Highest Education
-                  </label>
-                  <Select
-                    options={
-                      education.map((edu) => ({
-                        label: edu.name,
-                        value: edu.id
-                      }))
-                    }
+              {/* Highest Education */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Highest Education
+  </label>
+  <Dropdown
+    value={watch("educationTypeId")}
+    onChange={(e) => setValue("educationTypeId", e.value, { shouldValidate: true })}
+    options={education.map((edu) => ({ label: edu.name, value: edu.id }))}
+    optionLabel="label"
+    placeholder="Select Highest Education"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.educationTypeId && (
+    <p className="text-red-500 text-sm mt-2">{errors.educationTypeId.message}</p>
+  )}
+</div>
 
+{/* Occupation */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Occupation
+  </label>
+  <Dropdown
+    value={watch("occupationTypeId")}
+    onChange={(e) => setValue("occupationTypeId", e.value, { shouldValidate: true })}
+    options={occupation.map((occ) => ({ label: occ.name, value: occ.id }))}
+    optionLabel="label"
+    placeholder="Select Occupation"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.occupationTypeId && (
+    <p className="text-red-500 text-sm mt-2">{errors.occupationTypeId.message}</p>
+  )}
+</div>
 
-                    onChange={(selectedOption) => {
-                      setValue('educationTypeId', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Highest Education"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('educationTypeId', { required: 'Highest Education is required' })}
-                  />
-                  {errors.educationTypeId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.educationTypeId.message}</p>
-                  )}
-                </div>
+{/* Employed In */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Employed In
+  </label>
+  <Dropdown
+    value={watch("employedInId")}
+    onChange={(e) => setValue("employedInId", e.value, { shouldValidate: true })}
+    options={employedIn.map((emp) => ({ label: emp.name, value: emp.id }))}
+    optionLabel="label"
+    placeholder="Select Employed In"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.employedInId && (
+    <p className="text-red-500 text-sm mt-2">{errors.employedInId.message}</p>
+  )}
+</div>
 
-                {/* occupation */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Occupation
-                  </label>
-                  <Select
-                    options={
-                      occupation.map((occ) => ({
-                        label: occ.name,
-                        value: occ.id
-                      }))
-                    }
+{/* Annual Income */}
+<div className="mb-6">
+  <label className="block text-gray-700 text-sm font-medium mb-2">
+    Annual Income
+  </label>
+  <Dropdown
+    value={watch("annualIncome")}
+    onChange={(e) => setValue("annualIncome", e.value, { shouldValidate: true })}
+    options={[
+      { label: "Less than ₹10,000", value: "less_than_10000" },
+      { label: "₹10,000 - ₹50,000", value: "10000_to_50000" },
+      { label: "₹50,000 - ₹100,000", value: "50000_to_100000" },
+      { label: "₹100,000 - ₹200,000", value: "100000_to_200000" },
+      { label: "More than ₹200,000", value: "more_than_200000" },
+    ]}
+    optionLabel="label"
+    placeholder="Select Annual Income"
+    className="w-full border border-primary-300 rounded-xl"
+  />
+  {errors.annualIncome && (
+    <p className="text-red-500 text-sm mt-2">{errors.annualIncome.message}</p>
+  )}
+</div>
 
-
-                    onChange={(selectedOption) => {
-                      setValue('occupationTypeId', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Occupation"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('occupationTypeId', { required: 'Occupation is required' })}
-                  />
-                  {errors.occupationTypeId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.occupationTypeId.message}</p>
-                  )}
-                </div>
-
-                {/* Employed In */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Employed In
-                  </label>
-                  <Select
-                    options={
-                      employedIn.map((emp) => ({
-                        label: emp.name,
-                        value: emp.id
-                      }))
-                    }
-
-
-                    onChange={(selectedOption) => {
-                      setValue('employedInId', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select employed In"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('employedInId', { required: 'Employed In is required' })}
-                  />
-                  {errors.employedInId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.employedInId.message}</p>
-                  )}
-                </div>
-
-                {/* Annual Income */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Annual Income
-                  </label>
-                  <Select
-                    options={
-                      [
-                        { label: "Less than $10,000", value: "less_than_10000" },
-                        { label: "$10,000 - $50,000", value: "10000_to_50000" },
-                        { label: "$50,000 - $100,000", value: "50000_to_100000" },
-                        { label: "$100,000 - $200,000", value: "100000_to_200000" },
-                        { label: "More than $200,000", value: "more_than_200000" }
-                      ]
-                    }
-
-
-                    onChange={(selectedOption) => {
-                      setValue('annualIncome', selectedOption?.value, { shouldValidate: true });
-                    }}
-                    classNamePrefix="custom-select"
-                    className="w-full"
-                    placeholder="Select Annual Income"
-                  />
-                  {/* Hidden input for react-hook-form to track */}
-                  <input
-                    type="hidden"
-                    {...register('annualIncome', { required: 'Annual Income In is required' })}
-                  />
-                  {errors.annualIncome && (
-                    <p className="mt-1 text-sm text-red-600">{errors.annualIncome.message}</p>
-                  )}
-                </div>
               </div>
             }
             {/* Submit Button */}
@@ -802,4 +687,4 @@ const navigate = useNavigate();
   );
 };
 
-export default SignupPage;
+export default Registration;

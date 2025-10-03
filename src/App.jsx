@@ -24,6 +24,8 @@ import PrivateRoute from "./conponents/PrivateRoute";
 import Registration from "./screens/Registration";
 import axios from "axios";
 import { baseUrl } from "./Utils/baseUrl";
+import ProfileUpdateForm from "./screens/ProfileUpdateForm";
+import ChatBox from "./screens/ChatBox";
 
 
 function App() {
@@ -101,7 +103,9 @@ fetchAppSetting()
           <Route index  element={<DashboardWidgets />} />
           <Route path="widgets" element={<DashboardWidgets />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="profile-update/:id" element={<ProfileUpdateForm/>} />
           <Route path="settings" element={<Settings />} />
+          <Route path ="chat" element = {<ChatBox/>}/>
 
           
           {/* Nested Notifications Routes */}

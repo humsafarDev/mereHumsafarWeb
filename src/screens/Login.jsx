@@ -40,7 +40,7 @@ const EmailOtpLogin = () => {
 
           console.log(otpResponse.data,'OTP verified successfully');
           localStorage.setItem('mereHumsafarToken', otpResponse?.data.token);
-          localStorage.setItem('userData', JSON.stringify(otpResponse?.data.user));
+          localStorage.setItem('mereHumsafarUser', JSON.stringify(otpResponse?.data.user));
           setShowSuccess(true);
           // Redirect to dashboard or show success message
          // Adjust the path as needed
@@ -48,7 +48,7 @@ const EmailOtpLogin = () => {
           setTimeout(() => {
           //  console.log('Redirecting to dashboard...');
             // Here you would actually redirect the user
-            navigate('/dashboard');
+            navigate('/browse');
           }, 1500);
         } else {
 

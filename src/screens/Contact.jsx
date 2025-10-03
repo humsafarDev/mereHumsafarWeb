@@ -2,7 +2,7 @@ import React from 'react';
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaHeadset, FaPaperPlane } from 'react-icons/fa';
 import { MdOutlineSupportAgent, MdContactSupport } from 'react-icons/md';
 import { RiCustomerService2Fill } from 'react-icons/ri';
-import logo from "../assets/logo.png";
+
 
 function Contact() {
   return (
