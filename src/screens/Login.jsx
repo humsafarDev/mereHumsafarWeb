@@ -113,9 +113,9 @@ const EmailOtpLogin = () => {
               </div>
             </div>
             <div className="relative z-10">
-              <GiLovers className="text-5xl text-white mx-auto mb-3" />
-              <h1 className="text-3xl font-bold text-white mb-2 font-serif">Welcome</h1>
-              <p className="text-pink-100">Find your soulmate today</p>
+              <GiLovers className="text-5xl text-secondary mx-auto mb-3" />
+              <h1 className="text-3xl font-bold text-secondary mb-2 font-serif">Welcome</h1>
+              <p className="text-secondary">Find your soulmate today</p>
             </div>
           </div>
 
@@ -247,14 +247,14 @@ const EmailOtpLogin = () => {
                       setOtpSent(false);
                       reset({ email: getValues('email') });
                     }}
-                    className="text-secondary/50 hover:text-secondary font-medium"
+                    className="text-secondary hover:text-secondary font-medium"
                   >
                     ← Change email address
                   </button>
                 ) : (
                   <>
                     Don't have an account?{' '}
-                    <a href="#" className="text-pink-600 hover:text-secondary font-medium">
+                    <a href="#" className="text-secondry hover:text-secondary font-medium">
                       Sign up
                     </a>
                   </>

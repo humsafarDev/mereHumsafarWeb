@@ -63,11 +63,11 @@ const [selectedCity, setSelectedCity] = useState(null);
   
       if (makeProfileResponse.status === 200) {
         console.log('Profile created successfully:', makeProfileData);
-        localStorage.setItem('userData', JSON.stringify(makeProfileData));
+        localStorage.setItem('mereHumsafarUser', JSON.stringify(makeProfileData));
         alert("Profile created successfully");
   
         // ✅ Navigate only when successful
-        navigate('/dashboard');
+        navigate('/browse');
       } else {
         console.error('Error making profile:', makeProfileData.message);
       }

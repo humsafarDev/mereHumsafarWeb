@@ -29,7 +29,7 @@ const DashboardNavbar = ({ toggleSidebar }) => {
 
           <Link
             to="/"
-            className="flex items-center space-x-2 bg-secondary-400 text-white rounded-lg p-2 transition-colors"
+            className="flex items-center bg-gradient-to-r from-secondary-600 to-secondary-700 hover:from-secondary-600 hover:to-secondary-400 space-x-2 bg-secondary-400 text-white rounded-lg p-2 transition-colors"
           >
             <FiArrowLeft className="w-5 h-5" />
             <span className="font-medium">Back to Website</span>

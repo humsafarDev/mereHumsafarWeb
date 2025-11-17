@@ -25,3 +25,10 @@
     --color-secondary-dark800: #992e3e;
   }
   
+
+
+  .dropdown-menu button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }

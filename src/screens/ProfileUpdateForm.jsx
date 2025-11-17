@@ -12,10 +12,11 @@ import { BsWatch } from 'react-icons/bs';
 import { anualIncomeArr, diets, genders, heightOptions } from '../Utils/const';
 import { MultiSelect } from "primereact/multiselect";
 import { FaFemale, FaMale, FaQuran, FaPrayingHands, FaMoon, FaDonate, FaKaaba, FaMosque } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const religiousPractices = [
+export const religiousPracticesArr = [
   {
     name: "Hijab",
     id: "hijab",
@@ -67,6 +68,7 @@ export const religiousPractices = [
 ];
 
 const ProfileUpdateForm = () => {
+  const nav = useNavigate()
   const userData = JSON?.parse(localStorage.getItem("mereHumsafarUser") ?? "{}")
   const [education, setEducation] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
@@ -137,7 +139,7 @@ const ProfileUpdateForm = () => {
       setValue("city", selectedUser?.city ? {name:JSON?.parse(selectedUser?.city)?.name , isoCode: JSON?.parse(selectedUser?.city)?.isoCode}: { name: "Mumbai", isoCode: "MUM", stateCode: "MH", countryCode: "IN" })
       setValue("profileForId", selectedUser?.profileFor || null)
       setValue("gender", {name: selectedUser?.gender , id: selectedUser?.gender})
-      setValue("religiousPracticeArr", selectedUser?.religiousPractices ? religiousPractices?.filter(d => selectedUser?.religiousPractices?.split(",")?.includes(d.name)) : [])
+      setValue("religiousPracticeArr", selectedUser?.religiousPractices ? religiousPracticesArr?.filter(d => selectedUser?.religiousPractices?.split(",")?.includes(d.name)) : [])
       setValue("height", selectedUser?.height? { name: heightOptions?.find(h => `${h.id}` == `${selectedUser?.height}`)?.name, id: selectedUser?.height } : null)
 
     }
@@ -149,16 +151,18 @@ const ProfileUpdateForm = () => {
     fetchProfile();
   }, [])
 
-  console.log("religiousPracticeArr", watch("religiousPracticeArr"))
+
 
   const onSubmitHandler = async(data) => {
-    // onSubmit(data);
-    console.log("profile submit data", data)
+   
     const modified = {
       ...data,
       country: JSON.stringify(data?.country) || "",
       state: JSON.stringify(data?.state) || "",
       city: JSON.stringify(data?.city) || "",
+      fatherOccupation: data?.fatherOccupation,
+      casteTypeId: data?.casteTypeId?.id,
+      aboutMe: data?.aboutMe,
       liveWithFamily: data?.liveWithFamily?.name === "Yes" ? 1 : 0,
     diet: data?.diet?.name || null,
       height: data?.height?.id || null,
@@ -168,7 +172,7 @@ const ProfileUpdateForm = () => {
       employedInId: data?.employedInId?.id || null,
       maritalStatusTypeId: data?.maritalStatusTypeId?.id || null,
       motherTongueId: data?.motherTongueId?.id || null,
-      casteTypeId: data?.casteTypeId?.id || null,
+      
     
       dateOfBirth: data?.dateOfBirth ? new Date(data?.dateOfBirth)?.toISOString() : null,
       email: userData?.email,
@@ -187,7 +191,9 @@ const ProfileUpdateForm = () => {
     await  axios.put(url, modified)
         .then((response) => {
           // ✅ API succeeded
+
           reset()
+          nav("/dashboard/profile")
           console.log("Response:", response.data);
         })
         .catch((error) => {
@@ -201,7 +207,7 @@ const ProfileUpdateForm = () => {
     }
   };
 
-  console.log("watch all", watch())
+
   const fetchAllApis = async () => {
     try {
       const [
@@ -264,14 +270,14 @@ const ProfileUpdateForm = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-200/20 to-secondary-200/20 py-8 px-4 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-secondry-200 to-secondarydark-200 py-8 px-4 font-sans">
       <div className="max-w-6xl mx-auto">
         {/* Main Card Container */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-primary-200/30 backdrop-blur-sm">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-secondary-600">
           {/* Card Header */}
-          <div className="bg-gradient-to-r from-primary-600 to-secondary-600 p-8 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-secondarydark-700 to-secondary-600 p-8 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute inset-0 bg-gradient-to-r from-white to-primary-200"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-secondarydark-400 to-secondary-400"></div>
             </div>
             <div className="relative z-10">
               <h1 className="text-3xl font-bold text-white mb-2">Update Profile</h1>
@@ -740,7 +746,7 @@ const ProfileUpdateForm = () => {
       <MultiSelect
         {...field}
         value={field.value || []}   // ✅ controlled value (array)
-        options={religiousPractices}
+        options={religiousPracticesArr}
        
         onChange={(e) => field.onChange(e.value)}  // ✅ update form value
         optionLabel="name"
@@ -1142,7 +1148,7 @@ const ProfileUpdateForm = () => {
                         <Dropdown
                           {...field}
                           value={field.value || null}
-                          onChange={(e) => field.onChange(e.value?.id)}
+                          onChange={(e) => field.onChange(e.value)}
                           options={motherTongue}
                           optionLabel="name"
                           placeholder="Select Mother Tongue"
@@ -1170,7 +1176,7 @@ const ProfileUpdateForm = () => {
                         <Dropdown
                           {...field}
                           value={field.value || null}
-                          onChange={(e) => field.onChange(e.value?.id)}
+                          onChange={(e) => field.onChange(e.value)}
                           options={caste}
                           optionLabel="name"
                           placeholder="Select Caste"
@@ -1198,7 +1204,7 @@ const ProfileUpdateForm = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-8 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-xl hover:from-primary-700 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold shadow-lg"
+                  className="px-8 py-3 bg-gradient-to-r from-secondarydark-400 to-secondary-400 text-white rounded-xl hover:from-secondarydark-700 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold shadow-lg"
                 >
                   {isSubmitting ? 'Updating Profile...' : 'Update Profile'}
                 </button>

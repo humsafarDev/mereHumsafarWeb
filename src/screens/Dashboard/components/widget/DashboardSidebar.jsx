@@ -175,11 +175,11 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
         className={`md:h-[95vh]  h-screen w-14  text-white z-50 bg-white backdrop-blur-md md:rounded-2xl
         transform transition-transform duration-300 fixed lg:sticky lg:top-4 lg:left-4 top-0 left-0 
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        lg:translate-x-0 lg:flex-shrink-0  lg:rounded-2xl lg:border lg:border-secondary/20`}
+        lg:translate-x-0 lg:flex-shrink-0  lg:rounded-2xl lg:border lg:border-secondary-400`}
       >
         {/* Background */}
         <div className="absolute inset-0 md:rounded-2xl z-0 bg-[url('https://img.freepik.com/free-vector/realistic-blurred-floral-background_52683-63510.jpg')] bg-cover bg-no-repeat opacity-5" />
-        <div className="absolute inset-0 md:rounded-2xl bg-gradient-to-b from-secondary-400 via-secondary-400 to-secondary-400 z-0 opacity-40" />
+        <div className="absolute inset-0 md:rounded-2xl bg-gradient-to-b from-white-200 via-gray-400 to-white-100 z-0 opacity-40" />
 
         {/* Sidebar Content */}
         <div className="relative z-10 flex flex-col h-full">
@@ -201,7 +201,7 @@ const DashboardSidebar = ({ isOpen, setIsOpen }) => {
                       onClick={() => setActiveItem(path)}
                       className={`flex items-center justify-center rounded-xl transition-all group ${
                         isActive
-                          ? "bg-secondary text-primary font-semibold"
+                          ? "bg-gradient-to-b from-secondary-400 via-secondary-600 to-secondarydark-700 text-white font-semibold"
                           : "text-secondary "
                       }`}
                     >

@@ -13,11 +13,11 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [profileFor, setProfileFor] = useState([]); // New state for profileFor
-  const [selectedProfileFor, setSelectedProfileFor] =useState(null)
+  const [selectedProfileFor, setSelectedProfileFor] = useState(null)
   const navigate = useNavigate();
-  const { 
-    register, 
-    handleSubmit, 
+  const {
+    register,
+    handleSubmit,
     setValue,
     formState: { errors },
     getValues,
@@ -44,10 +44,10 @@ const Signup = () => {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
-  
+
     try {
       const { email, profileForId, otp } = data;
-  
+
       if (!otpSent) {
         await axios.post(`${baseUrl}/api/auth/signup`, {
           email,
@@ -55,29 +55,30 @@ const Signup = () => {
           liveWithFamily: 1,
           isSubAdmin: "2",
         });
-  
+
         console.log('OTP sent to:', email);
         setOtpSent(true);
       } else {
         if (otp.length !== 6) {
-        
+
           reset({ otp: '' }); // Clear OTP field
           return;
         }
-  
+
         const otpResponse = await axiosInstance.post(`${baseUrl}/api/auth/verify`, {
+          ...data,
           email,
           otp,
         });
-  
+
         const { token, user } = otpResponse.data;
-  
+
         localStorage.setItem('mereHumsafarToken', token);
         localStorage.setItem('mereHumsafarUser', JSON.stringify(user));
-  
+
         console.log('OTP verified successfully');
         setShowSuccess(true);
-  
+
         setTimeout(() => {
           navigate('/registration');
         }, 1500);
@@ -102,9 +103,9 @@ const Signup = () => {
         {/* Floating Hearts Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(10)].map((_, i) => (
-            <div 
+            <div
               key={i}
-              className="absolute text-secondary opacity-40"
+              className="absolute text-secondary-400 opacity-40"
               style={{
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
@@ -132,9 +133,9 @@ const Signup = () => {
               </div>
             </div>
             <div className="relative z-10">
-              <GiLovers className="text-5xl text-white mx-auto mb-3" />
-              <h1 className="text-3xl font-bold text-white mb-2 font-serif">Welcome</h1>
-              <p className="text-pink-100">Find your soulmate today</p>
+              <GiLovers className="text-5xl text-secondary mx-auto mb-3" />
+              <h1 className="text-3xl font-bold text-secondary mb-2 font-serif">Welcome</h1>
+              <p className="text-secondary">Find your soulmate today</p>
             </div>
           </div>
 
@@ -163,31 +164,31 @@ const Signup = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-6">
-    <label className="block text-gray-700 text-sm font-medium mb-2">
-      Profile For
-    </label>
-                       <Dropdown
-                         value={selectedProfileFor}                            // ✅ Controlled value
-                         onChange={(e) => {                                    // ✅ Update both state & react-hook-form
-                           setSelectedProfileFor(e.value);
-                           console.log("profileForId ", e?.value)
-                           setValue("profileForId", e?.value?.id || "");   // register field manually
-                         }}
-                         options={profileFor}                                  // ✅ Dropdown options
-                         optionLabel="name"                                     // ✅ Display name in dropdown
-                         placeholder="Select Profile For"
-                         className="w-full border border-primary-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all"
-                       />
-    {/* Hidden input for react-hook-form to track */}
-    <input
-      type="hidden"
-      {...register('profileForId', { required: 'Profile For is required' })}
-    />
-    {errors.profileForId && (
-      <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
-    )}
-  </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700 text-sm font-medium mb-2">
+                    Profile For
+                  </label>
+                  <Dropdown
+                    value={selectedProfileFor}                            // ✅ Controlled value
+                    onChange={(e) => {                                    // ✅ Update both state & react-hook-form
+                      setSelectedProfileFor(e.value);
+                      console.log("profileForId ", e?.value)
+                      setValue("profileForId", e?.value?.id || "");   // register field manually
+                    }}
+                    options={profileFor}                                  // ✅ Dropdown options
+                    optionLabel="name"                                     // ✅ Display name in dropdown
+                    placeholder="Select Profile For"
+                    className="w-full border border-primary-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all"
+                  />
+                  {/* Hidden input for react-hook-form to track */}
+                  <input
+                    type="hidden"
+                    {...register('profileForId', { required: 'Profile For is required' })}
+                  />
+                  {errors.profileForId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.profileForId.message}</p>
+                  )}
+                </div>
                 <div className="mb-6">
                   <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="email">
                     Email Address
@@ -202,7 +203,7 @@ const Signup = () => {
                       disabled={otpSent}
                       className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-0  focus:border-secondary outline-none transition`}
                       placeholder="your@email.com"
-                      {...register('email', { 
+                      {...register('email', {
                         required: 'Email is required',
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -231,7 +232,7 @@ const Signup = () => {
                         inputMode="numeric"
                         className={`w-full pl-10 pr-3 py-3 rounded-lg border ${errors.otp ? 'border-red-500' : 'border-gray-300'} focus:ring-0  outline-none transition`}
                         placeholder="Enter 6-digit OTP"
-                        {...register('otp', { 
+                        {...register('otp', {
                           required: 'OTP is required',
                           minLength: {
                             value: 6,
@@ -274,7 +275,7 @@ const Signup = () => {
                     </>
                   ) : (
                     <>
-                      {otpSent ? 'Verify OTP' : 'Signup'} 
+                      {otpSent ? 'Verify OTP' : 'Signup'}
                       <FaArrowRight />
                     </>
                   )}

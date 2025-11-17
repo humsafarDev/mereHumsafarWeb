@@ -34,6 +34,8 @@ import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import DashboardNavbar from "./DashboardNavbar";
 import DashboardSidebar from "./DashboardSidebar";
+import Header from "../../../../conponents/widget/Header";
+import Footer from "../../../../conponents/widget/Footer";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -49,9 +51,12 @@ const DashboardLayout = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+ 
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
+     
       <DashboardSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* Main Content */}
@@ -66,6 +71,7 @@ const DashboardLayout = () => {
           </div>
         </main>
       </div>
+      
     </div>
   );
 };

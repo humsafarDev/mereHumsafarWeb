@@ -26,9 +26,15 @@ import axios from "axios";
 import { baseUrl } from "./Utils/baseUrl";
 import ProfileUpdateForm from "./screens/ProfileUpdateForm";
 import ChatBox from "./screens/ChatBox";
+import ClientProfilePage from "./screens/Dashboard/ClientProfilePage";
+import PreferenceWithClient from "./screens/Dashboard/screens/PreferenceWithClient";
+
+import AuthRedirect from "./context/AuthRedirect";
 
 
 function App() {
+
+ 
 
   const [appsettingData, setAppSettingData] = useState(null)
 
@@ -73,6 +79,8 @@ fetchAppSetting()
 
   return (
     <Router>
+    <AuthRedirect />
+
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout />}>
@@ -83,7 +91,7 @@ fetchAppSetting()
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="login" element={<Login />} />
-          
+          {/* <Route path="client-profile" element={<ClientProfilePage/>} /> */}
           <Route path="signup" element={<Signup />} />
         </Route>
         <Route path="registration" element={
@@ -103,6 +111,7 @@ fetchAppSetting()
           <Route index  element={<DashboardWidgets />} />
           <Route path="widgets" element={<DashboardWidgets />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="client-profile" element={<PreferenceWithClient/>} />
           <Route path="profile-update/:id" element={<ProfileUpdateForm/>} />
           <Route path="settings" element={<Settings />} />
           <Route path ="chat" element = {<ChatBox/>}/>
