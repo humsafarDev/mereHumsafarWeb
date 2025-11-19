@@ -1,18 +1,24 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { isValid } from "../Utils/common";
+import useUsersList from "./useUsersList";
+import useAuthUser from "./useAuthUser";
 
 export default function AuthRedirect() {
   const navigate = useNavigate();
+  const userData = useAuthUser()
 
+  const loginUrl = useLocation().pathname;
+
+
+  console.log("loginUrl", loginUrl);
   useEffect(() => {
-    const userData = localStorage.getItem("mereHumsafarUser");
-   
-
-    if (userData) {
+    
+    // if(loginUrl !=="/login" && loginUrl !=="/signup" && loginUrl !=="/registration"){
+    if (userData && loginUrl !=="/login" ) {
       try {
-        const parsedUser = JSON.parse(userData);
-        if (!isValid(parsedUser.firstName)) {
+       
+        if (!isValid(userData.firstName)) {
           navigate("/registration", { replace: true });
         } 
         // else {
@@ -21,11 +27,24 @@ export default function AuthRedirect() {
       } catch (e) {
         console.error(e);
         localStorage.removeItem("mereHumsafarUser");
-        navigate("/login", { replace: true });
+        navigate("/signup", { replace: true });
       }
-    } else {
-      navigate("/login", { replace: true });
+    }  else if(loginUrl ==="/login"){
+//navigate("/login")
     }
+    //  else {
+    //   navigate("/signup", { replace: true });
+    // }
+  // }
+
+    //when click on signin go to signin page
+
+
+
+
+
+
+
   }, [navigate]);
 
   return null; // this component only redirects

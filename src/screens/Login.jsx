@@ -218,7 +218,7 @@ const EmailOtpLogin = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full bg-secondary/80  text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80' : ''}`}
+                  className={`w-full bg-secondary/80  text-socondary py-3 px-4 rounded-lg font-medium hover:opacity-90 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80' : ''}`}
                 >
                   {isLoading ? (
                     <>
